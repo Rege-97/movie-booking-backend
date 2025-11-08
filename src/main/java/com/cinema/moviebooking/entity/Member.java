@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class Member extends BaseTimeEntity {
 
     @Id
@@ -29,12 +28,24 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @Column(length = 512)
+    private String refreshToken;
+
     @Builder
-    public Member(String email, String password, String name, Role role) {
+    public Member(String email, String password, String name, Role role, String refreshToken) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.role = role;
+        this.refreshToken = refreshToken;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void clearRefreshToken() {
+        this.refreshToken = null;
     }
 
 }
