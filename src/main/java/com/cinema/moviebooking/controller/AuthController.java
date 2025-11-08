@@ -5,11 +5,13 @@ import com.cinema.moviebooking.dto.auth.LoginRequest;
 import com.cinema.moviebooking.dto.auth.LoginResponse;
 import com.cinema.moviebooking.dto.auth.SignUpRequest;
 import com.cinema.moviebooking.dto.auth.SignUpResponse;
+import com.cinema.moviebooking.security.CustomUserDetails;
 import com.cinema.moviebooking.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +50,16 @@ public class AuthController {
         LoginResponse loginResponse = authService.login(req);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(loginResponse, "로그인 되었습니다."));
+    }
+
+    /**
+     * 로그아웃 요청 처리
+     * - Refresh Token 제거를 통한 재발급 차단
+     * - 로그아웃 성공 시 204(No Content) 반환
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails member) {
+        authService.logout(member.getId());
+        return ResponseEntity.noContent().build();
     }
 }

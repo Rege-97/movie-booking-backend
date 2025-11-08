@@ -8,6 +8,7 @@ import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.entity.Role;
 import com.cinema.moviebooking.exception.DuplicateEmailException;
 import com.cinema.moviebooking.exception.InvalidCredentialsException;
+import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.MemberRepository;
 import com.cinema.moviebooking.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -59,15 +60,30 @@ public class AuthService {
         Member member = memberRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("아이디 또는 비밀번호가 틀렸습니다."));
 
+        // 비밀번호 검증
         if (!passwordEncoder.matches(req.getPassword(), member.getPassword())) {
             throw new InvalidCredentialsException("아이디 또는 비밀번호가 틀렸습니다.");
         }
 
+        // 토큰 발급
         String accessToken = jwtTokenProvider.generateAccessToken(member);
         String refreshToken = jwtTokenProvider.generateRefreshToken(member);
 
         member.updateRefreshToken(refreshToken);
 
         return LoginResponse.from(member, accessToken, refreshToken);
+    }
+
+    /**
+     * 로그아웃
+     * - 사용자 검증 후 Refresh 토큰 제거
+     */
+    @Transactional
+    public void logout(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("회원"));
+
+        // refresh token 제거
+        member.updateRefreshToken(null);
     }
 }
