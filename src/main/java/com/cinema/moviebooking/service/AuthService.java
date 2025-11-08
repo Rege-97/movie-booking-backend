@@ -4,6 +4,7 @@ import com.cinema.moviebooking.dto.auth.SignUpRequest;
 import com.cinema.moviebooking.dto.auth.SignUpResponse;
 import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.entity.Role;
+import com.cinema.moviebooking.exception.DuplicateEmailException;
 import com.cinema.moviebooking.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +21,7 @@ public class AuthService {
     @Transactional
     public SignUpResponse signUp(SignUpRequest req) {
         if (memberRepository.existsByEmail(req.getEmail())) {
-            throw new IllegalStateException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
         }
 
         Member member = Member.builder()
