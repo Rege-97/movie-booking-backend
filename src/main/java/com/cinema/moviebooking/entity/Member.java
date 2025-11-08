@@ -1,5 +1,6 @@
 package com.cinema.moviebooking.entity;
 
+import com.cinema.moviebooking.dto.auth.SignUpRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-
 public class Member extends BaseTimeEntity {
 
     @Id
