@@ -1,6 +1,7 @@
 package com.cinema.moviebooking.service;
 
 import com.cinema.moviebooking.dto.auth.SignUpRequest;
+import com.cinema.moviebooking.dto.auth.SignUpResponse;
 import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.entity.Role;
 import com.cinema.moviebooking.repository.MemberRepository;
@@ -17,7 +18,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long signUp(SignUpRequest req) {
+    public SignUpResponse signUp(SignUpRequest req) {
         if (memberRepository.existsByEmail(req.getEmail())) {
             throw new IllegalStateException("이미 사용 중인 이메일입니다.");
         }
@@ -30,6 +31,6 @@ public class AuthService {
                 .build();
 
         memberRepository.save(member);
-        return member.getId();
+        return new SignUpResponse(member.getId());
     }
 }
