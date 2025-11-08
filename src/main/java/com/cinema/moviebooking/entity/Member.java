@@ -1,6 +1,5 @@
 package com.cinema.moviebooking.entity;
 
-import com.cinema.moviebooking.dto.auth.SignUpRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
