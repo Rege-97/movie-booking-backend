@@ -15,6 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 인증 관련 비즈니스 로직 처리
+ * (회원가입, 로그인, 토큰 갱신 등)
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -23,6 +27,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * 회원가입
+     * - 이메일 중복 체크
+     * - 비밀번호 암호화 후 저장
+     */
     @Transactional
     public SignUpResponse signUp(SignUpRequest req) {
         if (memberRepository.existsByEmail(req.getEmail())) {
@@ -40,6 +49,11 @@ public class AuthService {
         return new SignUpResponse(member.getId());
     }
 
+    /**
+     * 로그인
+     * - 사용자 검증 후 JWT 발급
+     * - Refresh 토큰 DB 업데이트
+     */
     @Transactional
     public LoginResponse login(LoginRequest req) {
         Member member = memberRepository.findByEmail(req.getEmail())
