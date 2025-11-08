@@ -2,7 +2,6 @@ package com.cinema.moviebooking.security;
 
 import com.cinema.moviebooking.entity.Member;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.MacAlgorithm;
 import jakarta.annotation.PostConstruct;
