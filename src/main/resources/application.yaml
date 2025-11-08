@@ -21,3 +21,6 @@ jwt:
   secret: b8D!f@92LmZ#tQ7xWp$eVr4zS&yN9uXh
   access-expiration-ms: 3600000
   refresh-expiration-ms: 604800000
+admin:
+  email: admin@admin.com
+  password: asd123!!
