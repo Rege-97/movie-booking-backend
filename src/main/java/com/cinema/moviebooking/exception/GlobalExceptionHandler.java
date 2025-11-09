@@ -21,9 +21,9 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(msg));
     }
 
-    // 이메일 중복 에러
-    @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<?> handleDuplicateEmailException(DuplicateEmailException ex) {
+    // 리소스 중복 에러
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<?> handleDuplicateResourceException(DuplicateResourceException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage()));

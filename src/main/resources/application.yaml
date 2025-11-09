@@ -13,10 +13,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    defer-datasource-initialization: true
   data:
     redis:
       host: localhost
       port: 6379
+  sql:
+    init:
+      mode: always
 jwt:
   secret: b8D!f@92LmZ#tQ7xWp$eVr4zS&yN9uXh
   access-expiration-ms: 3600000
