@@ -41,6 +41,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cinemas").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/cinemas/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/theaters").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/theaters/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();

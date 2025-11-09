@@ -2,16 +2,16 @@ package com.cinema.moviebooking.service;
 
 import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.entity.Cinema;
+import com.cinema.moviebooking.entity.Theater;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
 import com.cinema.moviebooking.exception.NotFoundException;
-import com.cinema.moviebooking.repository.CinemaRepository;
+import com.cinema.moviebooking.repository.cinema.CinemaRepository;
+import com.cinema.moviebooking.repository.theater.TheaterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 영화관 관련 비즈니스 로직 처리
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class CinemaService {
 
     private final CinemaRepository cinemaRepository;
+    private final TheaterRepository theaterRepository;
 
     /**
      * 영화관 등록
@@ -60,7 +61,7 @@ public class CinemaService {
         List<CinemaResponse> responses = cinemas.stream()
                 .limit(size)
                 .map(CinemaResponse::from)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .toList();
 
         Long nextCursor = (hasNext && !responses.isEmpty())
                 ? responses.get(responses.size() - 1).getId()
@@ -107,5 +108,27 @@ public class CinemaService {
                 .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
 
         cinemaRepository.delete(cinema);
+    }
+
+    /**
+     * 영화관별 상영관 목록 조회
+     * - 영화관 존재 여부 검증
+     * - 해당 영화관의 상영관 데이터 조회
+     * - 상영관 목록과 영화관 정보를 반환
+     */
+    @Transactional(readOnly = true)
+    public TheaterListResponse getTheatersByCinemaId(Long id) {
+        Cinema cinema = cinemaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
+
+        List<Theater> theaters = theaterRepository.findByCinemaId(cinema.getId());
+
+        List<TheaterResponse> res = theaters.stream()
+                .map(TheaterResponse::from)
+                .toList();
+
+        CinemaResponse cinemaInfo = CinemaResponse.from(cinema);
+
+        return new TheaterListResponse(cinemaInfo, res);
     }
 }

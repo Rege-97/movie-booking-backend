@@ -1,15 +1,20 @@
 package com.cinema.moviebooking.exception;
 
 import com.cinema.moviebooking.common.response.ApiResponse;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // Validation 에러
@@ -45,9 +50,26 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    // enum 검증 에러
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof InvalidFormatException invalidEx &&
+                invalidEx.getTargetType().isEnum()) {
+            String enumType = invalidEx.getTargetType().getSimpleName();
+            return ResponseEntity
+                    .badRequest()
+                    .body(ApiResponse.error("잘못된 " + enumType + " 값입니다. 허용된 값: " +
+                            Arrays.toString(invalidEx.getTargetType().getEnumConstants())));
+        }
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error("요청 값의 형식이 잘못되었습니다."));
+    }
+
     // 그 외 에러
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleOtherExceptions(Exception ex) {
+        log.error(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));

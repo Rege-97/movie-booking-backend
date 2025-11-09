@@ -1,4 +1,4 @@
-package com.cinema.moviebooking.repository;
+package com.cinema.moviebooking.repository.cinema;
 
 import com.cinema.moviebooking.entity.Cinema;
 import org.springframework.data.jpa.repository.JpaRepository;

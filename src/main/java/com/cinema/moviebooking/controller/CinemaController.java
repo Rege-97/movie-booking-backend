@@ -87,4 +87,16 @@ public class CinemaController {
         cinemaService.deleteCinema(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * 영화관별 상영관 목록 조회 처리
+     * - PathVariable로 ID 전달
+     * - 조회 성공 시 200(OK) 반환
+     */
+    @GetMapping("/{id}/theaters")
+    public ResponseEntity<?> getTheaters(@PathVariable Long id) {
+        TheaterListResponse res = cinemaService.getTheatersByCinemaId(id);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "상영관 목록 조회 성공"));
+    }
 }

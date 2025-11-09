@@ -1,7 +1,7 @@
 package com.cinema.moviebooking.security;
 
 import com.cinema.moviebooking.entity.Member;
-import com.cinema.moviebooking.repository.MemberRepository;
+import com.cinema.moviebooking.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

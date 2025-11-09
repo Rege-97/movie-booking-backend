@@ -2,7 +2,7 @@ package com.cinema.moviebooking.config;
 
 import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.entity.Role;
-import com.cinema.moviebooking.repository.MemberRepository;
+import com.cinema.moviebooking.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

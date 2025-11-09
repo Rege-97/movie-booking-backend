@@ -9,7 +9,7 @@ import com.cinema.moviebooking.entity.Role;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
 import com.cinema.moviebooking.exception.InvalidCredentialsException;
 import com.cinema.moviebooking.exception.NotFoundException;
-import com.cinema.moviebooking.repository.MemberRepository;
+import com.cinema.moviebooking.repository.member.MemberRepository;
 import com.cinema.moviebooking.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
