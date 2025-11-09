@@ -34,4 +34,11 @@ public class Cinema extends BaseTimeEntity{
         this.address = address;
         this.contact = contact;
     }
+
+    public void updateInfo(String name, String region, String address, String contact) {
+        if (name != null) this.name = name;
+        if (region != null) this.region = region;
+        if (address != null) this.address = address;
+        if (contact != null) this.contact = contact;
+    }
 }

@@ -1,9 +1,6 @@
 package com.cinema.moviebooking.service;
 
-import com.cinema.moviebooking.dto.cinema.CinemaCreateRequest;
-import com.cinema.moviebooking.dto.cinema.CinemaCreateResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaCursorResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaResponse;
+import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
 import com.cinema.moviebooking.exception.NotFoundException;
@@ -80,6 +77,21 @@ public class CinemaService {
     public CinemaResponse getCinemaById(Long id) {
         Cinema cinema = cinemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
+
+        return CinemaResponse.from(cinema);
+    }
+
+    /**
+     * 영화관 수정
+     * - 영화관 존재 검증
+     * - 영화관 정보 수정 후 반환
+     */
+    @Transactional
+    public CinemaResponse updateCinema(Long id, CinemaUpdateRequest req) {
+        Cinema cinema = cinemaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
+
+        cinema.updateInfo(req.getName(), req.getRegion(), req.getAddress(), req.getContact());
 
         return CinemaResponse.from(cinema);
     }
