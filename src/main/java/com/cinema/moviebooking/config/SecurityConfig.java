@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cinemas").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/cinemas").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cinemas/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();

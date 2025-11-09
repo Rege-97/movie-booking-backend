@@ -4,6 +4,7 @@ import com.cinema.moviebooking.common.response.ApiResponse;
 import com.cinema.moviebooking.dto.cinema.CinemaCreateRequest;
 import com.cinema.moviebooking.dto.cinema.CinemaCreateResponse;
 import com.cinema.moviebooking.dto.cinema.CinemaCursorResponse;
+import com.cinema.moviebooking.dto.cinema.CinemaResponse;
 import com.cinema.moviebooking.service.CinemaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +50,17 @@ public class CinemaController {
         CinemaCursorResponse res = cinemaService.getCinemasByCursor(keyword, region, lastId, size);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화관 목록 조회 성공"));
+    }
+
+    /**
+     * 영화관 상세 조회 요청 처리
+     * - PathVariable로 ID 전달
+     * - 조회 성공 시 200(OK) 상태 코드 반환
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCinema(@PathVariable Long id) {
+        CinemaResponse res = cinemaService.getCinemaById(id);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "영화관 상세 조회 성공"));
     }
 }
