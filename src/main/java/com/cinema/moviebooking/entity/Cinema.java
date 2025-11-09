@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Cinema extends BaseTimeEntity{
+public class Cinema extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +36,9 @@ public class Cinema extends BaseTimeEntity{
     }
 
     public void updateInfo(String name, String region, String address, String contact) {
-        if (name != null) this.name = name;
-        if (region != null) this.region = region;
-        if (address != null) this.address = address;
-        if (contact != null) this.contact = contact;
+        if (name != null && !name.isBlank()) this.name = name;
+        if (region != null && !name.isBlank()) this.region = region;
+        if (address != null && !name.isBlank()) this.address = address;
+        if (contact != null && !name.isBlank()) this.contact = contact;
     }
 }
