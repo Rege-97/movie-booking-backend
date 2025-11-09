@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class CinemaCursorResponse {
-    private List<CinemaListResponse> cinemas;
+    private List<CinemaResponse> cinemas;
     private Long nextCursor;
     private boolean hasNext;
 

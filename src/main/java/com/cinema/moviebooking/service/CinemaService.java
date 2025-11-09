@@ -3,9 +3,10 @@ package com.cinema.moviebooking.service;
 import com.cinema.moviebooking.dto.cinema.CinemaCreateRequest;
 import com.cinema.moviebooking.dto.cinema.CinemaCreateResponse;
 import com.cinema.moviebooking.dto.cinema.CinemaCursorResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaListResponse;
+import com.cinema.moviebooking.dto.cinema.CinemaResponse;
 import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
+import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.CinemaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,9 +60,9 @@ public class CinemaService {
         List<Cinema> cinemas = cinemaRepository.findByCursor(keyword, region, lastId, size + 1);
         boolean hasNext = cinemas.size() > size;
 
-        List<CinemaListResponse> responses = cinemas.stream()
+        List<CinemaResponse> responses = cinemas.stream()
                 .limit(size)
-                .map(CinemaListResponse::from)
+                .map(CinemaResponse::from)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         Long nextCursor = (hasNext && !responses.isEmpty())
@@ -69,5 +70,17 @@ public class CinemaService {
                 : null;
 
         return new CinemaCursorResponse(responses, nextCursor, hasNext);
+    }
+
+    /**
+     * 영화관 상세 조회
+     * - 영화관 존재 검증 후 반환
+     */
+    @Transactional(readOnly = true)
+    public CinemaResponse getCinemaById(Long id) {
+        Cinema cinema = cinemaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
+
+        return CinemaResponse.from(cinema);
     }
 }

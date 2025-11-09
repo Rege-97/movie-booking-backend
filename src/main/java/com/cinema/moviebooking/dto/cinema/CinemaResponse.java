@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CinemaListResponse {
+public class CinemaResponse {
 
     private Long id;
     private String name;
@@ -14,8 +14,8 @@ public class CinemaListResponse {
     private String address;
     private String contact;
 
-    public static CinemaListResponse from(Cinema cinema) {
-        return CinemaListResponse.builder()
+    public static CinemaResponse from(Cinema cinema) {
+        return CinemaResponse.builder()
                 .id(cinema.getId())
                 .name(cinema.getName())
                 .region(cinema.getRegion())
