@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
+                        .requestMatchers("/api/cinemas").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 );
         return http.build();
