@@ -2,6 +2,8 @@ package com.cinema.moviebooking.service;
 
 import com.cinema.moviebooking.dto.theater.TheaterCreateRequest;
 import com.cinema.moviebooking.dto.theater.TheaterCreateResponse;
+import com.cinema.moviebooking.dto.theater.TheaterUpdateRequest;
+import com.cinema.moviebooking.dto.theater.TheaterUpdateResponse;
 import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.entity.Theater;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
@@ -45,5 +47,19 @@ public class TheaterService {
         theaterRepository.save(theater);
 
         return new TheaterCreateResponse(theater.getId());
+    }
+
+    /**
+     * 상영관 수정
+     * - 상영관 존재 검증
+     * - 상영관 정보 수정 후 반환
+     */
+    @Transactional
+    public TheaterUpdateResponse updateTheater(Long id, TheaterUpdateRequest req) {
+        Theater theater = theaterRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 상영관을 찾을 수 없습니다."));
+
+        theater.updateInfo(req.getName(), req.getSeatCount(), req.getScreenType(), req.getIsAvailable());
+        return TheaterUpdateResponse.from(theater);
     }
 }

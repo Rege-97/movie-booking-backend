@@ -40,4 +40,11 @@ public class Theater extends BaseTimeEntity {
         this.screenType = screenType;
         this.isAvailable = isAvailable;
     }
+
+    public void updateInfo(String name, int seatCount, ScreenType screenType, boolean isAvailable) {
+        if (name != null && !name.isBlank()) this.name = name;
+        if (seatCount > 0) this.seatCount = seatCount;
+        if (screenType != null) this.screenType = screenType;
+        this.isAvailable = isAvailable;
+    }
 }
