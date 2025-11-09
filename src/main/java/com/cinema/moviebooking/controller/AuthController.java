@@ -35,9 +35,9 @@ public class AuthController {
      */
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest req) {
-        SignUpResponse signUpResponse = authService.signUp(req);
+        SignUpResponse res = authService.signUp(req);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.created(signUpResponse, "회원가입이 완료되었습니다."));
+                .body(ApiResponse.created(res, "회원가입이 완료되었습니다."));
     }
 
     /**
@@ -47,9 +47,9 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
-        LoginResponse loginResponse = authService.login(req);
+        LoginResponse res = authService.login(req);
         return ResponseEntity.ok()
-                .body(ApiResponse.success(loginResponse, "로그인 되었습니다."));
+                .body(ApiResponse.success(res, "로그인 되었습니다."));
     }
 
     /**
