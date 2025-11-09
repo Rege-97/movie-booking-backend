@@ -18,8 +18,20 @@ public class Cinema extends BaseTimeEntity{
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, length = 100)
+    private String region;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false, length = 20)
+    private String contact;
+
     @Builder
-    public Cinema(String name) {
+    public Cinema(String name, String region, String address, String contact) {
         this.name = name;
+        this.region = region;
+        this.address = address;
+        this.contact = contact;
     }
 }
