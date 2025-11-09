@@ -62,4 +62,17 @@ public class TheaterService {
         theater.updateInfo(req.getName(), req.getSeatCount(), req.getScreenType(), req.getIsAvailable());
         return TheaterUpdateResponse.from(theater);
     }
+
+    /**
+     * 상영관 삭제
+     * - 상영관 존재 여부 검증
+     * - 삭제 성공 시 트랜잭션 커밋
+     */
+    @Transactional
+    public void deleteTheater(Long id) {
+        Theater theater = theaterRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 상영관을 찾을 수 없습니다."));
+
+        theaterRepository.delete(theater);
+    }
 }

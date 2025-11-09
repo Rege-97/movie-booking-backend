@@ -40,11 +40,24 @@ public class TheaterController {
      * 상영관 수정 요청 처리
      * - PathVariable로 상영관 ID 전달
      * - 요청값 검증(@Valid)
+     * - 관리자 권한(ROLE_ADMIN) 필요
      * - 수정 성공 시 200(OK) 반환
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTheater(@PathVariable Long id, @Valid @RequestBody TheaterUpdateRequest req) {
         TheaterUpdateResponse res = theaterService.updateTheater(id, req);
         return ResponseEntity.ok().body(ApiResponse.success(res, "상영관 수정이 완료되었습니다."));
+    }
+
+    /**
+     * 상영관 삭제 요청 처리
+     * - PathVariable로 ID 전달
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 삭제 성공 시 204(NO_CONTENT) 반환
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTheater(@PathVariable Long id) {
+        theaterService.deleteTheater(id);
+        return ResponseEntity.noContent().build();
     }
 }
