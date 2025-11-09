@@ -1,10 +1,7 @@
 package com.cinema.moviebooking.controller;
 
 import com.cinema.moviebooking.common.response.ApiResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaCreateRequest;
-import com.cinema.moviebooking.dto.cinema.CinemaCreateResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaCursorResponse;
-import com.cinema.moviebooking.dto.cinema.CinemaResponse;
+import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.service.CinemaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +23,7 @@ public class CinemaController {
     /**
      * 영화관 등록 처리
      * - 요청값 검증(@Valid)
+     * - 관리자 권한(ROLE_ADMIN) 필요
      * - 등록 성공 시 201(CREATED) 반환
      */
     @PostMapping
@@ -62,5 +60,18 @@ public class CinemaController {
         CinemaResponse res = cinemaService.getCinemaById(id);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화관 상세 조회 성공"));
+    }
+
+    /**
+     * 영화관 정보 수정 요청 처리
+     * - 일부 필드만 선택적으로 수정 가능
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 수정 성공 시 200(OK) 반환
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCinema(@PathVariable Long id, @Valid @RequestBody CinemaUpdateRequest req) {
+        CinemaResponse res = cinemaService.updateCinema(id, req);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "영화관 수정에 성공했습니다."));
     }
 }
