@@ -15,7 +15,7 @@ public class TheaterUpdateRequest {
     private String name;
 
     @Min(value = 10, message = "좌석 수는 10석 이상이어야 합니다.")
-    private int seatCount;
+    private Integer seatCount;
 
     private ScreenType screenType;
 
