@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class CinemaCreateRequest {
 
     @NotBlank(message = "영화관 이름은 필수입니다.")
+    @Size(max = 100, message = "이름은 100자 이하로 입력해주세요.")
     private String name;
 
     @NotBlank(message = "지역은 필수입니다.")
@@ -17,6 +18,7 @@ public class CinemaCreateRequest {
     private String region;
 
     @NotBlank(message = "주소는 필수입니다.")
+    @Size(max = 255, message = "주소는 255자 이하로 입력해주세요.")
     private String address;
 
     @NotBlank(message = "연락처는 필수입니다.")
