@@ -4,7 +4,7 @@ import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
 import com.cinema.moviebooking.exception.NotFoundException;
-import com.cinema.moviebooking.repository.CinemaRepository;
+import com.cinema.moviebooking.repository.cinema.CinemaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.cinema.moviebooking.repository;
+package com.cinema.moviebooking.repository.theater;
 
 import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.entity.Theater;
