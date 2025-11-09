@@ -95,4 +95,17 @@ public class CinemaService {
 
         return CinemaResponse.from(cinema);
     }
+
+    /**
+     * 영화관 삭제
+     * - 영화관 존재 여부 검증
+     * - 삭제 성공 시 트랜잭션 커밋
+     */
+    @Transactional
+    public void deleteCinema(Long id) {
+        Cinema cinema = cinemaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
+
+        cinemaRepository.delete(cinema);
+    }
 }

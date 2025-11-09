@@ -64,6 +64,7 @@ public class CinemaController {
 
     /**
      * 영화관 정보 수정 요청 처리
+     * - PathVariable로 ID 전달
      * - 일부 필드만 선택적으로 수정 가능
      * - 관리자 권한(ROLE_ADMIN) 필요
      * - 수정 성공 시 200(OK) 반환
@@ -73,5 +74,17 @@ public class CinemaController {
         CinemaResponse res = cinemaService.updateCinema(id, req);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화관 수정에 성공했습니다."));
+    }
+
+    /**
+     * 영화관 삭제 요청 처리
+     * - PathVariable로 ID 전달
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 삭제 성공 시 204(NO_CONTENT) 반환
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCinema(@PathVariable Long id) {
+        cinemaService.deleteCinema(id);
+        return ResponseEntity.noContent().build();
     }
 }
