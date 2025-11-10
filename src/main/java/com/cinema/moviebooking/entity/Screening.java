@@ -50,4 +50,7 @@ public class Screening extends BaseTimeEntity {
         this.theater = theater;
     }
 
+    public void updateStatus(ScreeningStatus newStatus) {
+        this.status = newStatus;
+    }
 }

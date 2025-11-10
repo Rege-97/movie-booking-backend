@@ -7,6 +7,7 @@ import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
+import com.cinema.moviebooking.exception.InvalidStateException;
 import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.movie.MovieRepository;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
@@ -65,5 +66,24 @@ public class ScreeningService {
         screeningRepository.save(screening);
 
         return new ScreeningCreateResponse(screening.getId());
+    }
+
+    /**
+     * 상영 스케줄 취소
+     * - 완료, 취소, 상영 중 상태는 취소 불가
+     * - 취소 가능 상태일 경우 상태를 CANCELED로 변경
+     */
+    @Transactional
+    public void cancelScreening(Long id) {
+        Screening screening = screeningRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 상영 스케줄을 찾을 수 없습니다."));
+
+        if (screening.getStatus() == ScreeningStatus.COMPLETED
+                || screening.getStatus() == ScreeningStatus.CANCELED
+                || screening.getStatus() == ScreeningStatus.ONGOING) {
+            throw new InvalidStateException("상영 중이거나 이미 완료·취소된 상영은 취소할 수 없습니다.");
+        }
+
+        screening.updateStatus(ScreeningStatus.CANCELED);
     }
 }

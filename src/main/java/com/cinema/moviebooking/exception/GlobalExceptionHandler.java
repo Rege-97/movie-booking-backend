@@ -59,6 +59,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    // 상태 변경 불가 예외
+    @ExceptionHandler(InvalidStateException.class)
+    public ResponseEntity<?> handleInvalidStateException(InvalidStateException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     // enum 검증 에러
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadableExceptionException(HttpMessageNotReadableException ex) {

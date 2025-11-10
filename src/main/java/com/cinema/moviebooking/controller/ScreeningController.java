@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 상영스케줄 관련 요청을 처리하는 컨트롤러
@@ -35,5 +32,17 @@ public class ScreeningController {
         ScreeningCreateResponse res = screeningService.createScreening(req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(res, "상영 스케줄 등록이 완료되었습니다."));
+    }
+
+    /**
+     * 상영 취소 요청 처리
+     * - PathVariable로 ID 전달
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 취소 성공 시 204(NO_CONTENT) 반환
+     */
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelScreening(@PathVariable Long id) {
+        screeningService.cancelScreening(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
