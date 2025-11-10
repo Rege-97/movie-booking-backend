@@ -17,6 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * 상영스케줄 관련 비즈니스 로직 처리
+ * (상영스케줄 등록, 수정, 삭제 등)
+ */
 @Service
 @RequiredArgsConstructor
 public class ScreeningService {
