@@ -4,6 +4,7 @@ import com.cinema.moviebooking.common.response.ApiResponse;
 import com.cinema.moviebooking.dto.movie.MovieCreateRequest;
 import com.cinema.moviebooking.dto.movie.MovieCreateResponse;
 import com.cinema.moviebooking.dto.movie.MovieCursorResponse;
+import com.cinema.moviebooking.dto.movie.MovieResponse;
 import com.cinema.moviebooking.entity.Rating;
 import com.cinema.moviebooking.service.MovieService;
 import jakarta.validation.Valid;
@@ -44,15 +45,27 @@ public class MovieController {
      */
     @GetMapping
     public ResponseEntity<?> getMovies(@RequestParam(required = false) String keyword,
-                                        @RequestParam(required = false) Rating rating,
-                                        @RequestParam(required = false) Boolean nowShowing,
-                                        @RequestParam(required = false) Integer releaseYear,
-                                        @RequestParam(defaultValue = "title") String searchBy,
-                                        @RequestParam(required = false) Long lastId,
-                                        @RequestParam(defaultValue = "10") int size) {
+                                       @RequestParam(required = false) Rating rating,
+                                       @RequestParam(required = false) Boolean nowShowing,
+                                       @RequestParam(required = false) Integer releaseYear,
+                                       @RequestParam(defaultValue = "title") String searchBy,
+                                       @RequestParam(required = false) Long lastId,
+                                       @RequestParam(defaultValue = "10") int size) {
         MovieCursorResponse res = movieService.getMoviesByCursor(keyword, rating, nowShowing, releaseYear, searchBy,
                 lastId, size);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화 목록 조회 성공"));
+    }
+
+    /**
+     * 영화 상세 조회 요청 처리
+     * - PathVariable로 ID 전달
+     * - 조회 성공 시 200(OK) 상태 코드 반환
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getMovie(@PathVariable Long id) {
+        MovieResponse res = movieService.getMovieById(id);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "영화 상세 조회 성공"));
     }
 }
