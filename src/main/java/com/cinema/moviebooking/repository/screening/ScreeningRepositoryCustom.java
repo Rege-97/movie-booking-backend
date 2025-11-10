@@ -1,10 +1,8 @@
 package com.cinema.moviebooking.repository.screening;
 
-import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.Theater;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

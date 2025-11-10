@@ -1,10 +1,7 @@
 package com.cinema.moviebooking.dto.Screening;
 
-import com.cinema.moviebooking.entity.ScreeningStatus;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

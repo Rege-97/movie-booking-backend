@@ -1,6 +1,5 @@
 package com.cinema.moviebooking.repository.screening;
 
-import com.cinema.moviebooking.entity.Cinema;
 import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
@@ -13,9 +12,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.cinema.moviebooking.entity.QCinema.cinema;
 import static com.cinema.moviebooking.entity.QScreening.screening;
 import static com.cinema.moviebooking.entity.QTheater.theater;
-import static com.cinema.moviebooking.entity.QCinema.cinema;
 
 @Repository
 @RequiredArgsConstructor

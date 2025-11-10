@@ -5,7 +5,6 @@ import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.service.CinemaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

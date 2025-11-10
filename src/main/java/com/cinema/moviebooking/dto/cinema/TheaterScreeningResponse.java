@@ -1,7 +1,6 @@
 package com.cinema.moviebooking.dto.cinema;
 
 import com.cinema.moviebooking.entity.ScreenType;
-import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.Theater;
 import lombok.Builder;
 import lombok.Getter;

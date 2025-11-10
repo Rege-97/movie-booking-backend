@@ -3,7 +3,6 @@ package com.cinema.moviebooking.controller;
 import com.cinema.moviebooking.common.response.ApiResponse;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateRequest;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateResponse;
-import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.service.ScreeningService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
