@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 상영관 관련 요청을 처리하는 컨트롤러
- * (상영관 등록, 조회, 수정, 삭제 등)
+ * (상영관 등록, 수정, 삭제 등)
  */
 @RestController
 @RequiredArgsConstructor

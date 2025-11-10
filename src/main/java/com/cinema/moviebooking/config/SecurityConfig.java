@@ -40,9 +40,17 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cinemas").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/cinemas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/cinemas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/cinemas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/theaters").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/theaters/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/theaters/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/theaters/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/movies").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/movies/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
                         .anyRequest().authenticated()
                 );
         return http.build();
