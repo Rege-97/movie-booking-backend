@@ -28,7 +28,7 @@ public class Movie extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Rating rating; // 관람등급 (전체, 12세, 15세, 청불 등)
+    private Rating rating;
 
     @Column(nullable = false)
     private Boolean nowShowing;
