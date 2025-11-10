@@ -1,9 +1,6 @@
 package com.cinema.moviebooking.service;
 
-import com.cinema.moviebooking.dto.movie.MovieCreateRequest;
-import com.cinema.moviebooking.dto.movie.MovieCreateResponse;
-import com.cinema.moviebooking.dto.movie.MovieCursorResponse;
-import com.cinema.moviebooking.dto.movie.MovieResponse;
+import com.cinema.moviebooking.dto.movie.*;
 import com.cinema.moviebooking.entity.Movie;
 import com.cinema.moviebooking.entity.Rating;
 import com.cinema.moviebooking.exception.NotFoundException;
@@ -79,6 +76,22 @@ public class MovieService {
     public MovieResponse getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 영화를 찾을 수 없습니다."));
+
+        return MovieResponse.from(movie);
+    }
+
+    /**
+     * 영화 수정
+     * - 영화 존재 검증
+     * - 영화 정보 수정 후 반환
+     */
+    @Transactional
+    public MovieResponse updateMovie(Long id, MovieUpdateRequest req) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화를 찾을 수 없습니다."));
+
+        movie.updateInfo(req.getTitle(), req.getDirector(), req.getGenre(), req.getRating(), req.getNowShowing(),
+                req.getRunningTimeMinutes(), req.getReleaseDate());
 
         return MovieResponse.from(movie);
     }

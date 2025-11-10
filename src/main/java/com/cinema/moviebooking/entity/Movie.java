@@ -51,4 +51,15 @@ public class Movie extends BaseTimeEntity {
         this.releaseDate = releaseDate;
     }
 
+    public void updateInfo(String title, String director, String genre, Rating rating, Boolean nowShowing,
+                           Integer runningTimeMinutes, LocalDate releaseDate) {
+        if (title != null && !title.isBlank()) this.title = title;
+        if (director != null && !director.isBlank()) this.director = director;
+        if (genre != null && !genre.isBlank()) this.genre = genre;
+        if (rating != null) this.rating = rating;
+        if (nowShowing != null) this.nowShowing = nowShowing;
+        if (runningTimeMinutes != null) this.runningTimeMinutes = runningTimeMinutes;
+        if (releaseDate != null) this.releaseDate = releaseDate;
+    }
+
 }
