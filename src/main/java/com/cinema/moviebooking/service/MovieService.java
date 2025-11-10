@@ -95,4 +95,17 @@ public class MovieService {
 
         return MovieResponse.from(movie);
     }
+
+    /**
+     * 영화 삭제
+     * - 영화 존재 여부 검증
+     * - 삭제 성공 시 트랜잭션 커밋
+     */
+    @Transactional
+    public void deleteMovie(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화를 찾을 수 없습니다."));
+
+        movieRepository.delete(movie);
+    }
 }

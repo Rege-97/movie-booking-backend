@@ -79,4 +79,17 @@ public class MovieController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화 정보 수정에 성공했습니다."));
     }
+
+    /**
+     * 영화 삭제 요청 처리
+     * - PathVariable로 ID 전달
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 삭제 성공 시 204(NO_CONTENT) 반환
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMovie(@PathVariable Long id) {
+        movieService.deleteMovie(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
