@@ -1,10 +1,7 @@
 package com.cinema.moviebooking.controller;
 
 import com.cinema.moviebooking.common.response.ApiResponse;
-import com.cinema.moviebooking.dto.movie.MovieCreateRequest;
-import com.cinema.moviebooking.dto.movie.MovieCreateResponse;
-import com.cinema.moviebooking.dto.movie.MovieCursorResponse;
-import com.cinema.moviebooking.dto.movie.MovieResponse;
+import com.cinema.moviebooking.dto.movie.*;
 import com.cinema.moviebooking.entity.Rating;
 import com.cinema.moviebooking.service.MovieService;
 import jakarta.validation.Valid;
@@ -67,5 +64,19 @@ public class MovieController {
         MovieResponse res = movieService.getMovieById(id);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "영화 상세 조회 성공"));
+    }
+
+    /**
+     * 영화 정보 수정 요청 처리
+     * - PathVariable로 ID 전달
+     * - 일부 필드만 선택적으로 수정 가능
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 수정 성공 시 200(OK) 반환
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMovie(@PathVariable Long id, @Valid @RequestBody MovieUpdateRequest req) {
+        MovieResponse res = movieService.updateMovie(id, req);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "영화 정보 수정에 성공했습니다."));
     }
 }
