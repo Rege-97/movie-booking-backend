@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 영화 관련 비즈니스 로직 처리
+ * (영화 등록, 조회, 수정, 삭제 등)
+ */
 @Service
 @RequiredArgsConstructor
 public class MovieService {
