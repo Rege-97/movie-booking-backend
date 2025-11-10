@@ -21,7 +21,16 @@ public class Screening extends BaseTimeEntity {
     private LocalDateTime startTime;
 
     @Column(nullable = false)
-    private Integer price;
+    private LocalDateTime endTime;
+
+    @Column(nullable = false)
+    private Integer totalSeats;
+
+    @Column(nullable = false)
+    private Integer availableSeats;
+
+    @Enumerated(EnumType.STRING)
+    private ScreeningStatus status;
 
     @ManyToOne
     private Movie movie;
@@ -30,12 +39,18 @@ public class Screening extends BaseTimeEntity {
     private Theater theater;
 
     @Builder
-    public Screening(Long id, LocalDateTime startTime, Integer price, Movie movie, Theater theater) {
-        this.id = id;
+    public Screening(LocalDateTime startTime, LocalDateTime endTime, Integer totalSeats, Integer availableSeats,
+                     ScreeningStatus status, Movie movie, Theater theater) {
         this.startTime = startTime;
-        this.price = price;
+        this.endTime = endTime;
+        this.totalSeats = totalSeats;
+        this.availableSeats = availableSeats;
+        this.status = status;
         this.movie = movie;
         this.theater = theater;
     }
 
+    public void updateStatus(ScreeningStatus newStatus) {
+        this.status = newStatus;
+    }
 }

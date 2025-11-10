@@ -17,10 +17,19 @@ import java.util.Objects;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    // Validation 에러
+    // @RequestBody Validation 에러
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
         String msg = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(msg));
+    }
+
+    // @RequestParam Validation 에러
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(jakarta.validation.ConstraintViolationException ex) {
+        String msg = ex.getConstraintViolations().iterator().next().getMessage();
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.error(msg));
@@ -47,6 +56,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    // 상태 변경 불가 예외
+    @ExceptionHandler(InvalidStateException.class)
+    public ResponseEntity<?> handleInvalidStateException(InvalidStateException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
