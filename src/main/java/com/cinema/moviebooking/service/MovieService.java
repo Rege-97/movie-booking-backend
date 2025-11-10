@@ -52,7 +52,7 @@ public class MovieService {
      * - 응답 데이터에 nextCursor 포함 (다음 요청 시 기준점)
      */
     @Transactional(readOnly = true)
-    public MovieCursorResponse getMovies(String keyword, Rating rating, Boolean nowShowing,
+    public MovieCursorResponse getMoviesByCursor(String keyword, Rating rating, Boolean nowShowing,
                                          Integer releaseYear, String searchBy, Long lastId,
                                          int size) {
         List<Movie> movies = movieRepository.findByCursor(keyword, rating, nowShowing, releaseYear, searchBy, lastId,
