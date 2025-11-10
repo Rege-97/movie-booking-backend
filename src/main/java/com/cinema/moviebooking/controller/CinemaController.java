@@ -4,15 +4,21 @@ import com.cinema.moviebooking.common.response.ApiResponse;
 import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.service.CinemaService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.FutureOrPresent;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 /**
  * 영화관 관련 요청을 처리하는 컨트롤러
  * (영화관 등록, 조회, 수정, 삭제 등)
  */
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/cinemas")
@@ -98,5 +104,21 @@ public class CinemaController {
         TheaterListResponse res = cinemaService.getTheatersByCinemaId(id);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "상영관 목록 조회 성공"));
+    }
+
+    /**
+     * 영화관별 상영 스케줄 조회 요청 처리
+     * - PathVariable로 영화관 ID 전달
+     * - 상영일(screeningDate) 필터 적용
+     * - 조회 성공 시 200(OK) 반환
+     */
+    @GetMapping("/{id}/screenings")
+    public ResponseEntity<?> getScreenings(@PathVariable Long id,
+                                           @FutureOrPresent(message = "상영일은 오늘 날짜 이후여야 합니다.")
+                                           @RequestParam(defaultValue = "#{T(java.time.LocalDate).now().toString()}")
+                                           LocalDate screeningDate) {
+        CinemaScreeningResponse res = cinemaService.getCinemaScreening(id, screeningDate);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "상영스케줄 조회 성공"));
     }
 }
