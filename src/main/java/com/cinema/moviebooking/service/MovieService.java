@@ -2,11 +2,16 @@ package com.cinema.moviebooking.service;
 
 import com.cinema.moviebooking.dto.movie.MovieCreateRequest;
 import com.cinema.moviebooking.dto.movie.MovieCreateResponse;
+import com.cinema.moviebooking.dto.movie.MovieCursorResponse;
+import com.cinema.moviebooking.dto.movie.MovieResponse;
 import com.cinema.moviebooking.entity.Movie;
+import com.cinema.moviebooking.entity.Rating;
 import com.cinema.moviebooking.repository.movie.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 영화 관련 비즈니스 로직 처리
@@ -37,5 +42,31 @@ public class MovieService {
         movieRepository.save(movie);
 
         return new MovieCreateResponse(movie.getId());
+    }
+
+    /**
+     * 영화 목록 조회 (커서 기반)
+     * - 검색어 및 검색조건, 등급, 개봉년도, 상영여부 필터 적용
+     * - 마지막 ID(lastId)를 기준으로 다음 데이터 조회
+     * - 조회 결과 크기(size)에 따라 다음 페이지 존재 여부(hasNext) 계산
+     * - 응답 데이터에 nextCursor 포함 (다음 요청 시 기준점)
+     */
+    @Transactional(readOnly = true)
+    public MovieCursorResponse getMovies(String keyword, Rating rating, Boolean nowShowing,
+                                         Integer releaseYear, String searchBy, Long lastId,
+                                         int size) {
+        List<Movie> movies = movieRepository.findByCursor(keyword, rating, nowShowing, releaseYear, searchBy, lastId,
+                size + 1);
+        boolean hasNext = movies.size() > size;
+
+        List<MovieResponse> responses = movies.stream()
+                .limit(size)
+                .map(MovieResponse::from)
+                .toList();
+
+        Long nextCursor = (hasNext && !responses.isEmpty())
+                ? responses.get(responses.size() - 1).getId() : null;
+
+        return new MovieCursorResponse(responses, nextCursor, hasNext);
     }
 }

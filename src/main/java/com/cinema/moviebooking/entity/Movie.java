@@ -31,7 +31,7 @@ public class Movie extends BaseTimeEntity {
     private Rating rating; // 관람등급 (전체, 12세, 15세, 청불 등)
 
     @Column(nullable = false)
-    private boolean nowShowing;
+    private Boolean nowShowing;
 
     @Column(nullable = false)
     private Integer runningTimeMinutes;
@@ -40,7 +40,7 @@ public class Movie extends BaseTimeEntity {
     private LocalDate releaseDate;
 
     @Builder
-    public Movie(String title, String director, String genre, Rating rating, boolean nowShowing,
+    public Movie(String title, String director, String genre, Rating rating, Boolean nowShowing,
                  Integer runningTimeMinutes, LocalDate releaseDate) {
         this.title = title;
         this.director = director;
