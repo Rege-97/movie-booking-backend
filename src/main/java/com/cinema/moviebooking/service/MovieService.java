@@ -6,6 +6,7 @@ import com.cinema.moviebooking.dto.movie.MovieCursorResponse;
 import com.cinema.moviebooking.dto.movie.MovieResponse;
 import com.cinema.moviebooking.entity.Movie;
 import com.cinema.moviebooking.entity.Rating;
+import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.movie.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,8 +54,8 @@ public class MovieService {
      */
     @Transactional(readOnly = true)
     public MovieCursorResponse getMoviesByCursor(String keyword, Rating rating, Boolean nowShowing,
-                                         Integer releaseYear, String searchBy, Long lastId,
-                                         int size) {
+                                                 Integer releaseYear, String searchBy, Long lastId,
+                                                 int size) {
         List<Movie> movies = movieRepository.findByCursor(keyword, rating, nowShowing, releaseYear, searchBy, lastId,
                 size + 1);
         boolean hasNext = movies.size() > size;
@@ -68,5 +69,17 @@ public class MovieService {
                 ? responses.get(responses.size() - 1).getId() : null;
 
         return new MovieCursorResponse(responses, nextCursor, hasNext);
+    }
+
+    /**
+     * 영화 상세 조회
+     * - 영화 존재 검증 후 반환
+     */
+    @Transactional(readOnly = true)
+    public MovieResponse getMovieById(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 영화를 찾을 수 없습니다."));
+
+        return MovieResponse.from(movie);
     }
 }
