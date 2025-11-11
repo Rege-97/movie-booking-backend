@@ -29,5 +29,5 @@ public class TheaterCreateRequest {
     @NotNull(message = "상영관 타입은 필수입니다.")
     private ScreenType screenType;
 
-    private boolean isAvailable;
+    private Boolean available;
 }

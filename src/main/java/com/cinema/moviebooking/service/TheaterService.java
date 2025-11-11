@@ -38,6 +38,7 @@ public class TheaterService {
      * - 영화관 존재 여부 검증
      * - 상영관 이름 중복 체크
      * - 상영관 정보 저장 후 ID 반환
+     * - 입력받은 행(Row) × 열(Column) 수에 따라 좌석 자동 생성
      */
     @Transactional
     public TheaterCreateResponse createTheater(TheaterCreateRequest req) {
@@ -53,12 +54,10 @@ public class TheaterService {
                 .cinema(cinema)
                 .seatCount(req.getSeatColumnCount() * req.getSeatRowCount())
                 .screenType(req.getScreenType())
-                .isAvailable(req.isAvailable())
+                .isAvailable(req.getAvailable())
                 .build();
 
         theaterRepository.save(theater);
-
-        List<Seat> seats = new ArrayList<>();
 
         char seatRow = 'A';
 
@@ -70,16 +69,14 @@ public class TheaterService {
                         .theater(theater)
                         .build();
 
-                seats.add(seat);
+                theater.addSeat(seat);
             }
             seatRow++;
         }
 
-        seatRepository.saveAll(seats);
-
         log.info("상영관 [{}] 등록 완료 - 총 {}석 ({}행 × {}열)",
                 theater.getName(),
-                seats.size(),
+                theater.getSeatCount(),
                 req.getSeatRowCount(),
                 req.getSeatColumnCount());
 
@@ -96,7 +93,7 @@ public class TheaterService {
         Theater theater = theaterRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 상영관을 찾을 수 없습니다."));
 
-        theater.updateInfo(req.getName(), req.getSeatCount(), req.getScreenType(), req.getIsAvailable());
+        theater.updateInfo(req.getName(), req.getScreenType(), req.getAvailable());
         return TheaterUpdateResponse.from(theater);
     }
 

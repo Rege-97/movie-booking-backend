@@ -1,10 +1,7 @@
 package com.cinema.moviebooking.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Entity
@@ -21,6 +18,7 @@ public class Seat extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer seatNumber;
 
+    @Setter
     @ManyToOne
     private Theater theater;
 
