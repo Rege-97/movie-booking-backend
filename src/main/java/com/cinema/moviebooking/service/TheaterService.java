@@ -17,9 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 상영관 관련 비즈니스 로직 처리
  * (상영관 등록, 수정, 삭제 등)
