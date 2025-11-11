@@ -5,12 +5,15 @@ import com.cinema.moviebooking.dto.theater.TheaterCreateResponse;
 import com.cinema.moviebooking.dto.theater.TheaterUpdateRequest;
 import com.cinema.moviebooking.dto.theater.TheaterUpdateResponse;
 import com.cinema.moviebooking.entity.Cinema;
+import com.cinema.moviebooking.entity.Seat;
 import com.cinema.moviebooking.entity.Theater;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
 import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.cinema.CinemaRepository;
+import com.cinema.moviebooking.repository.seat.SeatRepository;
 import com.cinema.moviebooking.repository.theater.TheaterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +23,19 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TheaterService {
 
     private final CinemaRepository cinemaRepository;
     private final TheaterRepository theaterRepository;
+    private final SeatRepository seatRepository;
 
     /**
      * 상영관 등록
      * - 영화관 존재 여부 검증
      * - 상영관 이름 중복 체크
      * - 상영관 정보 저장 후 ID 반환
+     * - 입력받은 행(Row) × 열(Column) 수에 따라 좌석 자동 생성
      */
     @Transactional
     public TheaterCreateResponse createTheater(TheaterCreateRequest req) {
@@ -43,12 +49,33 @@ public class TheaterService {
         Theater theater = Theater.builder()
                 .name(req.getName())
                 .cinema(cinema)
-                .seatCount(req.getSeatCount())
+                .seatCount(req.getSeatColumnCount() * req.getSeatRowCount())
                 .screenType(req.getScreenType())
-                .isAvailable(req.isAvailable())
+                .isAvailable(req.getAvailable())
                 .build();
 
         theaterRepository.save(theater);
+
+        char seatRow = 'A';
+
+        for (int i = 1; i <= req.getSeatRowCount(); i++) {
+            for (int j = 1; j <= req.getSeatColumnCount(); j++) {
+                Seat seat = Seat.builder()
+                        .seatRow(seatRow)
+                        .seatNumber(j)
+                        .theater(theater)
+                        .build();
+
+                theater.addSeat(seat);
+            }
+            seatRow++;
+        }
+
+        log.info("상영관 [{}] 등록 완료 - 총 {}석 ({}행 × {}열)",
+                theater.getName(),
+                theater.getSeatCount(),
+                req.getSeatRowCount(),
+                req.getSeatColumnCount());
 
         return new TheaterCreateResponse(theater.getId());
     }
@@ -63,7 +90,7 @@ public class TheaterService {
         Theater theater = theaterRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 상영관을 찾을 수 없습니다."));
 
-        theater.updateInfo(req.getName(), req.getSeatCount(), req.getScreenType(), req.getIsAvailable());
+        theater.updateInfo(req.getName(), req.getScreenType(), req.getAvailable());
         return TheaterUpdateResponse.from(theater);
     }
 

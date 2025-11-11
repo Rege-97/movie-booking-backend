@@ -21,7 +21,7 @@ public class TheaterUpdateResponse {
                 .name(theater.getName())
                 .seatCount(theater.getSeatCount())
                 .screenType(theater.getScreenType())
-                .isAvailable(theater.isAvailable())
+                .isAvailable(theater.getIsAvailable())
                 .build();
     }
 }

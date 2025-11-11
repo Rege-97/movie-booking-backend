@@ -1,10 +1,7 @@
 package com.cinema.moviebooking.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Entity
@@ -16,16 +13,17 @@ public class Seat extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false, length = 10)
-    private String seatRow;
+    private Character seatRow;
 
     @Column(nullable = false)
     private Integer seatNumber;
 
+    @Setter
     @ManyToOne
     private Theater theater;
 
     @Builder
-    public Seat(String seatRow, Integer seatNumber, Theater theater) {
+    public Seat(Character seatRow, Integer seatNumber, Theater theater) {
         this.seatRow = seatRow;
         this.seatNumber = seatNumber;
         this.theater = theater;
