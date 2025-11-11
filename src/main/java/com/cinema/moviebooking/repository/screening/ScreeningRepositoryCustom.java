@@ -18,4 +18,6 @@ public interface ScreeningRepositoryCustom {
     void updateToOngoingIfStarted(LocalDateTime now);
 
     void updateToCompletedIfEnded(LocalDateTime now);
+
+    void updateToScheduledIfOpenTimeReached(LocalDateTime now);
 }

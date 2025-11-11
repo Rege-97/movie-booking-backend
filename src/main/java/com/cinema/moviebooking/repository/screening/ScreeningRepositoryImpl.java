@@ -85,6 +85,18 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .execute();
     }
 
+    @Transactional
+    @Override
+    public void updateToScheduledIfOpenTimeReached(LocalDateTime now) {
+        queryFactory.update(screening)
+                .where(
+                        screening.status.eq(ScreeningStatus.PENDING),
+                        buildTimeCondition(ScreeningStatus.PENDING, now)
+                )
+                .set(screening.status, ScreeningStatus.SCHEDULED)
+                .execute();
+    }
+
     private BooleanExpression screeningDateEq(LocalDate screeningDate) {
         return screening.startTime.year().eq(screeningDate.getYear())
                 .and(screening.startTime.month().eq(screeningDate.getMonthValue()))
@@ -93,11 +105,14 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     /**
      * 상영 상태에 따른 시간 조건 생성
+     * - 등록(PENDING): 예매 오픈 시간이 현재 시각보다 같거나 이르면 true
      * - 예정(SCHEDULED): 시작 15분 전이면 true
      * - 상영중(ONGOING): 종료 시간이 현재 시각보다 같거나 이르면 true
      */
     private BooleanExpression buildTimeCondition(ScreeningStatus status, LocalDateTime now) {
-        if (status == ScreeningStatus.SCHEDULED) {
+        if (status == ScreeningStatus.PENDING) {
+            return screening.openTime.loe(now);
+        } else if (status == ScreeningStatus.SCHEDULED) {
             return screening.startTime.loe(now.plusMinutes(15));
         } else if (status == ScreeningStatus.ONGOING) {
             return screening.endTime.loe(now);
