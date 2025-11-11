@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ScreeningStatus {
+    PENDING("등록 완료(오픈 전)"),
     SCHEDULED("상영 예정"),
     ONGOING("상영 중"),
     COMPLETED("상영 종료"),

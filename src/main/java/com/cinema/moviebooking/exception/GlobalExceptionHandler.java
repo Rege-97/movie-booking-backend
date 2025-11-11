@@ -35,6 +35,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(msg));
     }
 
+    // 잘못된 요청 에러
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<?> handleInvalidRequestException(InvalidRequestException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     // 리소스 중복 에러
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<?> handleDuplicateResourceException(DuplicateResourceException ex) {

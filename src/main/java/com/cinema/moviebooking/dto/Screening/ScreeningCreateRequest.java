@@ -1,5 +1,6 @@
 package com.cinema.moviebooking.dto.Screening;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,8 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ScreeningCreateRequest {
 
+    @NotNull(message = "예매 오픈 시간은 필수입니다.")
+    @Future(message = "예매 오픈 시간은 현재 시각 이후여야 합니다.")
+    private LocalDateTime openTime;
+
     @NotNull(message = "상영 시작 시간은 필수입니다.")
-    @FutureOrPresent(message = "상영 시작 시간은 오늘 이후 또는 오늘이어야 합니다.")
+    @Future(message = "상영 시작 시간은 현재 시각 이후여야 합니다.")
     private LocalDateTime startTime;
 
     @NotNull(message = "영화 ID는 필수입니다.")
