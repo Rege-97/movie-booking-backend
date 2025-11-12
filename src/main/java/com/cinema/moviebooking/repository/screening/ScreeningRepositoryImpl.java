@@ -50,21 +50,10 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .fetch();
     }
 
-    @Override
-    public List<Screening> findScreeningsForStatusUpdate(ScreeningStatus status, LocalDateTime now) {
-        return queryFactory
-                .selectFrom(screening)
-                .where(
-                        screening.status.eq(status),
-                        buildTimeCondition(status, now)
-                )
-                .fetch();
-    }
-
     @Transactional
     @Override
-    public void updateToOngoingIfStarted(LocalDateTime now) {
-        queryFactory.update(screening)
+    public Long updateToOngoingIfStarted(LocalDateTime now) {
+        return queryFactory.update(screening)
                 .where(
                         screening.status.eq(ScreeningStatus.SCHEDULED),
                         buildTimeCondition(ScreeningStatus.SCHEDULED, now)
@@ -75,8 +64,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     @Transactional
     @Override
-    public void updateToCompletedIfEnded(LocalDateTime now) {
-        queryFactory.update(screening)
+    public Long updateToCompletedIfEnded(LocalDateTime now) {
+        return queryFactory.update(screening)
                 .where(
                         screening.status.eq(ScreeningStatus.ONGOING),
                         buildTimeCondition(ScreeningStatus.ONGOING, now)
@@ -87,8 +76,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     @Transactional
     @Override
-    public void updateToScheduledIfOpenTimeReached(LocalDateTime now) {
-        queryFactory.update(screening)
+    public Long updateToScheduledIfOpenTimeReached(LocalDateTime now) {
+        return queryFactory.update(screening)
                 .where(
                         screening.status.eq(ScreeningStatus.PENDING),
                         buildTimeCondition(ScreeningStatus.PENDING, now)

@@ -31,49 +31,32 @@ public class ScreeningStatusScheduler {
         long start = System.currentTimeMillis();
         LocalDateTime now = LocalDateTime.now();
 
-        // 예매 오픈 처리
-        List<Screening> openingScreenings =
-                screeningRepository.findScreeningsForStatusUpdate(ScreeningStatus.PENDING, now);
-        screeningRepository.updateToScheduledIfOpenTimeReached(now);
+        boolean isChanged = false;
 
-        for (Screening screening : openingScreenings) {
-            log.info("🎟예매 오픈: [{} / {}] | 영화: [{}] (오픈: {}, 상영: {})",
-                    screening.getTheater().getCinema().getName(),
-                    screening.getTheater().getName(),
-                    screening.getMovie().getTitle(),
-                    screening.getOpenTime(),
-                    screening.getStartTime()
-            );
+        Long openCount = screeningRepository.updateToScheduledIfOpenTimeReached(now);
+        if (openCount > 0) {
+            log.info("예매 오픈: {}건 처리 완료", openCount);
+            isChanged = true;
         }
 
         // 상영 시작 처리
-        List<Screening> startingScreenings =
-                screeningRepository.findScreeningsForStatusUpdate(ScreeningStatus.SCHEDULED, now);
-        screeningRepository.updateToOngoingIfStarted(now);
-        for (Screening screening : startingScreenings) {
-            log.info("상영 시작: [{} / {}] | 영화: [{}] ({} ~ {})",
-                    screening.getTheater().getCinema().getName(),
-                    screening.getTheater().getName(),
-                    screening.getMovie().getTitle(),
-                    screening.getStartTime(),
-                    screening.getEndTime()
-            );
+        Long startCount = screeningRepository.updateToOngoingIfStarted(now);
+        if (startCount > 0) {
+            log.info("상영 시작: {}건 처리 완료", startCount);
+            isChanged = true;
         }
 
         // 상영 종료 처리
-        List<Screening> endingScreenings = screeningRepository.findScreeningsForStatusUpdate(ScreeningStatus.ONGOING,
-                now);
-        screeningRepository.updateToCompletedIfEnded(now);
-        for (Screening screening : endingScreenings) {
-            log.info("상영 종료: [{} / {}] | 영화: [{}] ({} ~ {})",
-                    screening.getTheater().getCinema().getName(),
-                    screening.getTheater().getName(),
-                    screening.getMovie().getTitle(),
-                    screening.getStartTime(),
-                    screening.getEndTime()
-            );
+        Long endCount = screeningRepository.updateToCompletedIfEnded(now);
+        if (endCount > 0) {
+            log.info("상영 종료: {}건 처리 완료", endCount);
+            isChanged = true;
         }
+
         long end = System.currentTimeMillis();
-        log.info("[스케줄러] 실행 완료 (총 소요시간: {} ms)", (end - start));
+        long duration = end - start;
+        if (duration > 1000 || isChanged) {
+            log.info("[스케줄러] 실행 완료 (총 소요시간: {} ms)", duration);
+        }
     }
 }

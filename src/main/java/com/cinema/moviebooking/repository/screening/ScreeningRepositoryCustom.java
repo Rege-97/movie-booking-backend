@@ -13,11 +13,9 @@ public interface ScreeningRepositoryCustom {
 
     List<Screening> findValidByCinemaAndDate(Long cinemaId, LocalDate screeningDate);
 
-    List<Screening> findScreeningsForStatusUpdate(ScreeningStatus status, LocalDateTime now);
+    Long updateToOngoingIfStarted(LocalDateTime now);
 
-    void updateToOngoingIfStarted(LocalDateTime now);
+    Long updateToCompletedIfEnded(LocalDateTime now);
 
-    void updateToCompletedIfEnded(LocalDateTime now);
-
-    void updateToScheduledIfOpenTimeReached(LocalDateTime now);
+    Long updateToScheduledIfOpenTimeReached(LocalDateTime now);
 }
