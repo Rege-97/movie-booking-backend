@@ -58,4 +58,8 @@ public class Screening extends BaseTimeEntity {
     public void updateStatus(ScreeningStatus newStatus) {
         this.status = newStatus;
     }
+
+    public void updateAvailableSeats(Integer availableSeats) {
+        this.availableSeats = availableSeats;
+    }
 }
