@@ -22,8 +22,8 @@ public class ReservedSeatRepositoryImpl implements ReservedSeatRepositoryCustom 
         return queryFactory
                 .select(seat.id)
                 .from(reservedSeat)
-                .join(reservation, reservedSeat.reservation)
-                .join(seat, reservedSeat.seat)
+                .join(reservedSeat.reservation, reservation)
+                .join(reservedSeat.seat, seat)
                 .where(
                         reservation.screening.id.eq(screeningId),
                         reservation.status.eq(ReservationStatus.CONFIRMED),

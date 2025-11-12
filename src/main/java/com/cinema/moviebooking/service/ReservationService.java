@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 예매 관련 비즈니스 로직 처리
+ * (예매 등록, 취소 등)
+ */
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -88,6 +92,7 @@ public class ReservationService {
                 .movieTitle(screening.getMovie().getTitle())
                 .status(reservation.getStatus())
                 .seatNames(seatNames)
+                .screeningTime(screening.getStartTime())
                 .build();
     }
 }
