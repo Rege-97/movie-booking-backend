@@ -9,14 +9,12 @@ import lombok.Getter;
 public class AvailableSeatResponse {
 
     private Long id;
-    private Character seatRow;
-    private Integer seatNumber;
+    private String seatName;
 
     public static AvailableSeatResponse from(Seat seat) {
         return AvailableSeatResponse.builder()
                 .id(seat.getId())
-                .seatRow(seat.getSeatRow())
-                .seatNumber(seat.getSeatNumber())
+                .seatName(seat.getSeatRow().toString() + seat.getSeatNumber())
                 .build();
     }
 }

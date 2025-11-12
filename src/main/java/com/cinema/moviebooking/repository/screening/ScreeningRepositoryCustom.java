@@ -1,7 +1,6 @@
 package com.cinema.moviebooking.repository.screening;
 
 import com.cinema.moviebooking.entity.Screening;
-import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
 
 import java.time.LocalDate;

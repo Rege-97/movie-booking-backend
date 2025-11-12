@@ -1,7 +1,5 @@
 package com.cinema.moviebooking.scheduler;
 
-import com.cinema.moviebooking.entity.Screening;
-import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Component
