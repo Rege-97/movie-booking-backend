@@ -5,7 +5,6 @@ import com.cinema.moviebooking.dto.reservation.QMyReservationResponse;
 import com.cinema.moviebooking.dto.reservation.QReservationSeatRow;
 import com.cinema.moviebooking.dto.reservation.ReservationSeatRow;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
