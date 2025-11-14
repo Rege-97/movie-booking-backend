@@ -41,6 +41,7 @@ public class ReservationController {
     /**
      * 내 예매 목록 조회 요청 처리
      * - 커서 기반 페이지네이션 지원 (lastId, size)
+     * - 로그인 필요
      * - 조회 성공 시 200(OK) 상태 코드 반환
      */
     @GetMapping("/my")
@@ -50,5 +51,17 @@ public class ReservationController {
         MyReservationCursorResponse res = reservationService.getMyReservationCursor(member, lastId, size);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(res, "내 예매 목록 조회 성공"));
+    }
+
+    /**
+     * 예매 취소 요청 처리
+     * - PathVariable로 ID 전달
+     * - 로그인 필요
+     * - 취소 성공 시 204(NO_CONTENT) 반환
+     */
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelReservation(@PathVariable Long id, @AuthenticationPrincipal Member member) {
+        reservationService.cancelReservation(member, id);
+        return ResponseEntity.noContent().build();
     }
 }
