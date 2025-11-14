@@ -4,6 +4,7 @@ import com.cinema.moviebooking.dto.reservation.*;
 import com.cinema.moviebooking.entity.*;
 import com.cinema.moviebooking.exception.InvalidStateException;
 import com.cinema.moviebooking.exception.NotFoundException;
+import com.cinema.moviebooking.exception.UnauthorizedReservationException;
 import com.cinema.moviebooking.repository.reservation.ReservationRepository;
 import com.cinema.moviebooking.repository.reservation.ReservedSeatRepository;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -144,5 +146,39 @@ public class ReservationService {
                 : null;
 
         return new MyReservationCursorResponse(reservations, nextCursor, hasNext);
+    }
+
+    /**
+     * 예매 취소
+     * - 예매 존재 여부 검증
+     * - 로그인 사용자 검증
+     * - 현재 상태 검증
+     * - 취소 가능 시간 검증
+     * - 취소 가능 상태일 경우 상태를 CANCELED로 변경
+     */
+    @Transactional
+    public void cancelReservation(Member member, Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("해당 예매를 찾을 수 없습니다."));
+
+        if (!reservation.getMember().getId().equals(member.getId())) {
+            throw new UnauthorizedReservationException("로그인한 사용자의 예매가 아닙니다.");
+        }
+
+        Screening screening = reservation.getScreening();
+
+        if (reservation.getStatus().equals(ReservationStatus.CANCELLED)) {
+            throw new InvalidStateException("해당 예매는 이미 취소됐습니다.");
+        }
+
+        LocalDateTime cancelDeadline = screening.getStartTime().minusMinutes(15);
+        if (LocalDateTime.now().isAfter(cancelDeadline)) {
+            throw new InvalidStateException("상영 시작 15분 전까지만 예매를 취소할 수 있습니다.");
+        }
+
+        int canceledSeatCount = reservation.getReservedSeats().size();
+        screening.updateAvailableSeats(screening.getAvailableSeats() + canceledSeatCount);
+
+        reservation.updateState(ReservationStatus.CANCELLED);
     }
 }

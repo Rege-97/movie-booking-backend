@@ -43,4 +43,8 @@ public class Reservation extends BaseTimeEntity {
         this.reservedSeats.add(reservedSeats);
         reservedSeats.setReservation(this);
     }
+
+    public void updateState(ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
 }
