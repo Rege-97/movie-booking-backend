@@ -1,7 +1,6 @@
 package com.cinema.moviebooking.service;
 
-import com.cinema.moviebooking.dto.reservation.ReservationCreateRequest;
-import com.cinema.moviebooking.dto.reservation.ReservationCreateResponse;
+import com.cinema.moviebooking.dto.reservation.*;
 import com.cinema.moviebooking.entity.*;
 import com.cinema.moviebooking.exception.InvalidStateException;
 import com.cinema.moviebooking.exception.NotFoundException;
@@ -14,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 예매 관련 비즈니스 로직 처리
@@ -94,5 +95,54 @@ public class ReservationService {
                 .seatNames(seatNames)
                 .screeningTime(screening.getStartTime())
                 .build();
+    }
+
+    /**
+     * 내 예매 목록 조회 (커서 기반)
+     * - 마지막 ID(lastId)를 기준으로 다음 데이터 조회
+     * - 조회 결과 크기(size)에 따라 다음 페이지 존재 여부(hasNext) 계산
+     * - 응답 데이터에 nextCursor 포함 (다음 요청 시 기준점)
+     */
+    @Transactional(readOnly = true)
+    public MyReservationCursorResponse getMyReservationCursor(Member member, Long lastId, Integer size) {
+
+        // 예매 목록 조회
+        List<MyReservationResponse> reservations =
+                reservationRepository.findReservationCursorByMember(member.getId(), lastId, size + 1);
+
+        if (reservations.isEmpty()) {
+            return new MyReservationCursorResponse(List.of(), null, false);
+        }
+
+        // 예매된 좌석들 조회 및 그룹핑
+        List<Long> reservationIds = reservations.stream()
+                .map(MyReservationResponse::getReservationId)
+                .toList();
+
+        List<ReservationSeatRow> seatRows =
+                reservationRepository.findReservedSeatByReservationIds(reservationIds);
+
+        Map<Long, List<String>> seatMap = new HashMap<>();
+        for (ReservationSeatRow row : seatRows) {
+            seatMap.computeIfAbsent(row.getReservationId(), k -> new ArrayList<>())
+                    .add(row.getSeatRow() + row.getSeatNumber().toString());
+        }
+
+        for (MyReservationResponse res : reservations) {
+            res.setSeats(seatMap.getOrDefault(res.getReservationId(), List.of()));
+        }
+
+        // 반환 데이터 조립
+        boolean hasNext = reservations.size() > size;
+
+        if (hasNext) {
+            reservations = reservations.subList(0, size);
+        }
+
+        Long nextCursor = (hasNext && !reservations.isEmpty())
+                ? reservations.get(reservations.size() - 1).getReservationId()
+                : null;
+
+        return new MyReservationCursorResponse(reservations, nextCursor, hasNext);
     }
 }

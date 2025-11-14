@@ -29,7 +29,7 @@ public class Reservation extends BaseTimeEntity {
     private Screening screening;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<ReservedSeat> reservedSeat = new ArrayList<>();
+    private final List<ReservedSeat> reservedSeats = new ArrayList<>();
 
     @Builder
     public Reservation(Long id, ReservationStatus status, Member member, Screening screening) {
@@ -39,8 +39,8 @@ public class Reservation extends BaseTimeEntity {
         this.screening = screening;
     }
 
-    public void addReservedSeat(ReservedSeat reservedSeat) {
-        this.reservedSeat.add(reservedSeat);
-        reservedSeat.setReservation(this);
+    public void addReservedSeat(ReservedSeat reservedSeats) {
+        this.reservedSeats.add(reservedSeats);
+        reservedSeats.setReservation(this);
     }
 }
