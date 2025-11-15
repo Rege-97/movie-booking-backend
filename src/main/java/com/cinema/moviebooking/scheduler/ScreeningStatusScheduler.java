@@ -1,6 +1,7 @@
 package com.cinema.moviebooking.scheduler;
 
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
+import com.cinema.moviebooking.util.QueryCounter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,35 +26,46 @@ public class ScreeningStatusScheduler {
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void updateScreeningStatus() {
-        long start = System.currentTimeMillis();
-        LocalDateTime now = LocalDateTime.now();
 
+        QueryCounter.start();
+        long start = System.currentTimeMillis();
         boolean isChanged = false;
 
-        Long openCount = screeningRepository.updateToScheduledIfOpenTimeReached(now);
-        if (openCount > 0) {
-            log.info("예매 오픈: {}건 처리 완료", openCount);
-            isChanged = true;
-        }
+        try {
+            LocalDateTime now = LocalDateTime.now();
 
-        // 상영 시작 처리
-        Long startCount = screeningRepository.updateToOngoingIfStarted(now);
-        if (startCount > 0) {
-            log.info("상영 시작: {}건 처리 완료", startCount);
-            isChanged = true;
-        }
+            Long openCount = screeningRepository.updateToScheduledIfOpenTimeReached(now);
+            if (openCount > 0) {
+                log.info("예매 오픈: {}건 처리 완료", openCount);
+                isChanged = true;
+            }
 
-        // 상영 종료 처리
-        Long endCount = screeningRepository.updateToCompletedIfEnded(now);
-        if (endCount > 0) {
-            log.info("상영 종료: {}건 처리 완료", endCount);
-            isChanged = true;
-        }
+            Long startCount = screeningRepository.updateToOngoingIfStarted(now);
+            if (startCount > 0) {
+                log.info("상영 시작: {}건 처리 완료", startCount);
+                isChanged = true;
+            }
 
-        long end = System.currentTimeMillis();
-        long duration = end - start;
-        if (duration > 1000 || isChanged) {
-            log.info("[스케줄러] 실행 완료 (총 소요시간: {} ms)", duration);
+            Long endCount = screeningRepository.updateToCompletedIfEnded(now);
+            if (endCount > 0) {
+                log.info("상영 종료: {}건 처리 완료", endCount);
+                isChanged = true;
+            }
+
+        } finally {
+            long end = System.currentTimeMillis();
+            long duration = end - start;
+            Integer queryCount = QueryCounter.getCount();
+
+            QueryCounter.end();
+
+            if (queryCount != null) {
+                log.info("[스케줄러] updateScreeningStatus - Query Count: {}", queryCount);
+            }
+
+            if (duration > 1000 || isChanged) {
+                log.info("[스케줄러] 실행 완료 (총 소요시간: {} ms)", duration);
+            }
         }
     }
 }
