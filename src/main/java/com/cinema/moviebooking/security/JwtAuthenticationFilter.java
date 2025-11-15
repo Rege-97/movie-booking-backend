@@ -1,5 +1,6 @@
 package com.cinema.moviebooking.security;
 
+import com.cinema.moviebooking.entity.Member;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,12 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (token != null) {
                 String email = jwtTokenProvider.getSubject(token);
-                String role = jwtTokenProvider.getRole(token);
 
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
+                    Member member = customUserDetailsService.loadMemberByEmail(email);
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(member.getRole().name());
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(email, null, Collections.singleton(authority));
+                            new UsernamePasswordAuthenticationToken(member, null, Collections.singleton(authority));
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);

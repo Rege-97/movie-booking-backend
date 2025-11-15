@@ -35,6 +35,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(msg));
     }
 
+    // 잘못된 요청 에러
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<?> handleInvalidRequestException(InvalidRequestException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     // 리소스 중복 에러
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<?> handleDuplicateResourceException(DuplicateResourceException ex) {
@@ -81,6 +89,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ApiResponse.error("요청 값의 형식이 잘못되었습니다."));
+    }
+
+    // 권한 없음 에러
+    @ExceptionHandler(UnauthorizedReservationException.class)
+    public ResponseEntity<?> handleUnauthorizedReservationException(UnauthorizedReservationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     // 그 외 에러

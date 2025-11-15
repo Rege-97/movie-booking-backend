@@ -29,4 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 Collections.singleton(new SimpleGrantedAuthority(member.getRole().getDescription()))
         );
     }
+
+    public Member loadMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+    }
 }

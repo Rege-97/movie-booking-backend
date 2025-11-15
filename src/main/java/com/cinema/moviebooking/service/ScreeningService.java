@@ -1,22 +1,23 @@
 package com.cinema.moviebooking.service;
 
+import com.cinema.moviebooking.dto.Screening.AvailableSeatResponse;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateRequest;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateResponse;
-import com.cinema.moviebooking.entity.Movie;
-import com.cinema.moviebooking.entity.Screening;
-import com.cinema.moviebooking.entity.ScreeningStatus;
-import com.cinema.moviebooking.entity.Theater;
+import com.cinema.moviebooking.entity.*;
 import com.cinema.moviebooking.exception.DuplicateResourceException;
+import com.cinema.moviebooking.exception.InvalidRequestException;
 import com.cinema.moviebooking.exception.InvalidStateException;
 import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.movie.MovieRepository;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
+import com.cinema.moviebooking.repository.seat.SeatRepository;
 import com.cinema.moviebooking.repository.theater.TheaterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 상영스케줄 관련 비즈니스 로직 처리
@@ -29,6 +30,7 @@ public class ScreeningService {
     private final ScreeningRepository screeningRepository;
     private final MovieRepository movieRepository;
     private final TheaterRepository theaterRepository;
+    private final SeatRepository seatRepository;
 
     /**
      * 상영스케쥴 등록
@@ -46,6 +48,10 @@ public class ScreeningService {
         Theater theater = theaterRepository.findById(req.getTheaterId())
                 .orElseThrow(() -> new NotFoundException("해당 상영관을 찾을 수 없습니다."));
 
+        if (req.getOpenTime().isAfter(req.getStartTime())) {
+            throw new InvalidRequestException("예매 오픈 시간은 상영 시작 시간보다 이전이어야 합니다.");
+        }
+
         LocalDateTime startTime = req.getStartTime();
         LocalDateTime endTime = req.getStartTime().plusMinutes(movie.getRunningTimeMinutes());
 
@@ -54,11 +60,12 @@ public class ScreeningService {
         }
 
         Screening screening = Screening.builder()
+                .openTime(req.getOpenTime())
                 .startTime(startTime)
                 .endTime(endTime)
                 .totalSeats(theater.getSeatCount())
                 .availableSeats(theater.getSeatCount())
-                .status(ScreeningStatus.SCHEDULED)
+                .status(ScreeningStatus.PENDING)
                 .movie(movie)
                 .theater(theater)
                 .build();
@@ -85,5 +92,22 @@ public class ScreeningService {
         }
 
         screening.updateStatus(ScreeningStatus.CANCELED);
+    }
+
+    /**
+     * 예약 가능 좌석 조회
+     * - 상영 스케줄 존재 여부 검증
+     * - 해당 상영 스케줄에서 이미 예약된 좌석을 제외한 잔여 좌석 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<AvailableSeatResponse> getAvailableSeat(Long id) {
+        Screening screening = screeningRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 상영 스케줄을 찾을 수 없습니다."));
+
+        List<Seat> seats = seatRepository.findAvailableSeatsByScreening(id);
+
+        return seats.stream()
+                .map(AvailableSeatResponse::from)
+                .toList();
     }
 }

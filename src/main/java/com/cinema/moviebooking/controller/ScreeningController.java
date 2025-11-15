@@ -1,6 +1,7 @@
 package com.cinema.moviebooking.controller;
 
 import com.cinema.moviebooking.common.response.ApiResponse;
+import com.cinema.moviebooking.dto.Screening.AvailableSeatResponse;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateRequest;
 import com.cinema.moviebooking.dto.Screening.ScreeningCreateResponse;
 import com.cinema.moviebooking.service.ScreeningService;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 상영스케줄 관련 요청을 처리하는 컨트롤러
@@ -44,5 +47,16 @@ public class ScreeningController {
     public ResponseEntity<?> cancelScreening(@PathVariable Long id) {
         screeningService.cancelScreening(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * 예매 가능 좌석 조회 요청 처리
+     * - 조회 성공 시 200(OK) 상태 코드 반환
+     */
+    @GetMapping("/{id}/available-seats")
+    public ResponseEntity<?> getAvailableSeat(@PathVariable Long id) {
+        List<AvailableSeatResponse> res = screeningService.getAvailableSeat(id);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "예매 가능 좌석 조회 성공"));
     }
 }

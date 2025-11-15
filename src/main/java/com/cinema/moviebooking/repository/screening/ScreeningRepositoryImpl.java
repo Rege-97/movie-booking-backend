@@ -50,21 +50,10 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .fetch();
     }
 
-    @Override
-    public List<Screening> findScreeningsForStatusUpdate(ScreeningStatus status, LocalDateTime now) {
-        return queryFactory
-                .selectFrom(screening)
-                .where(
-                        screening.status.eq(status),
-                        buildTimeCondition(status, now)
-                )
-                .fetch();
-    }
-
     @Transactional
     @Override
-    public void updateToOngoingIfStarted(LocalDateTime now) {
-        queryFactory.update(screening)
+    public Long updateToOngoingIfStarted(LocalDateTime now) {
+        return queryFactory.update(screening)
                 .where(
                         screening.status.eq(ScreeningStatus.SCHEDULED),
                         buildTimeCondition(ScreeningStatus.SCHEDULED, now)
@@ -75,13 +64,25 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     @Transactional
     @Override
-    public void updateToCompletedIfEnded(LocalDateTime now) {
-        queryFactory.update(screening)
+    public Long updateToCompletedIfEnded(LocalDateTime now) {
+        return queryFactory.update(screening)
                 .where(
                         screening.status.eq(ScreeningStatus.ONGOING),
                         buildTimeCondition(ScreeningStatus.ONGOING, now)
                 )
                 .set(screening.status, ScreeningStatus.COMPLETED)
+                .execute();
+    }
+
+    @Transactional
+    @Override
+    public Long updateToScheduledIfOpenTimeReached(LocalDateTime now) {
+        return queryFactory.update(screening)
+                .where(
+                        screening.status.eq(ScreeningStatus.PENDING),
+                        buildTimeCondition(ScreeningStatus.PENDING, now)
+                )
+                .set(screening.status, ScreeningStatus.SCHEDULED)
                 .execute();
     }
 
@@ -93,11 +94,14 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     /**
      * 상영 상태에 따른 시간 조건 생성
+     * - 등록(PENDING): 예매 오픈 시간이 현재 시각보다 같거나 이르면 true
      * - 예정(SCHEDULED): 시작 15분 전이면 true
      * - 상영중(ONGOING): 종료 시간이 현재 시각보다 같거나 이르면 true
      */
     private BooleanExpression buildTimeCondition(ScreeningStatus status, LocalDateTime now) {
-        if (status == ScreeningStatus.SCHEDULED) {
+        if (status == ScreeningStatus.PENDING) {
+            return screening.openTime.loe(now);
+        } else if (status == ScreeningStatus.SCHEDULED) {
             return screening.startTime.loe(now.plusMinutes(15));
         } else if (status == ScreeningStatus.ONGOING) {
             return screening.endTime.loe(now);
