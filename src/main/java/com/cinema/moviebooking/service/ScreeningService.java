@@ -13,6 +13,8 @@ import com.cinema.moviebooking.repository.screening.ScreeningRepository;
 import com.cinema.moviebooking.repository.seat.SeatRepository;
 import com.cinema.moviebooking.repository.theater.TheaterRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,9 @@ public class ScreeningService {
     private final MovieRepository movieRepository;
     private final TheaterRepository theaterRepository;
     private final SeatRepository seatRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String SEAT_COUNT_KEY = "screening:seats";
 
     /**
      * 상영스케쥴 등록
@@ -41,6 +46,7 @@ public class ScreeningService {
      * - 총 좌석수와 남은 좌석수는 상영관의 좌석 정보를 저장
      */
     @Transactional
+    @CacheEvict(value = "cinemaScreening", allEntries = true)
     public ScreeningCreateResponse createScreening(ScreeningCreateRequest req) {
         Movie movie = movieRepository.findById(req.getMovieId())
                 .orElseThrow(() -> new NotFoundException("해당 영화를 찾을 수 없습니다."));
@@ -72,6 +78,12 @@ public class ScreeningService {
 
         screeningRepository.save(screening);
 
+        redisTemplate.opsForHash().put(
+                SEAT_COUNT_KEY,
+                screening.getId().toString(),
+                theater.getSeatCount().toString()
+        );
+
         return new ScreeningCreateResponse(screening.getId());
     }
 
@@ -81,6 +93,7 @@ public class ScreeningService {
      * - 취소 가능 상태일 경우 상태를 CANCELED로 변경
      */
     @Transactional
+    @CacheEvict(value = "cinemaScreening", allEntries = true)
     public void cancelScreening(Long id) {
         Screening screening = screeningRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 상영 스케줄을 찾을 수 없습니다."));
@@ -90,6 +103,7 @@ public class ScreeningService {
                 || screening.getStatus() == ScreeningStatus.ONGOING) {
             throw new InvalidStateException("상영 중이거나 이미 완료·취소된 상영은 취소할 수 없습니다.");
         }
+        redisTemplate.opsForHash().delete(SEAT_COUNT_KEY, id.toString());
 
         screening.updateStatus(ScreeningStatus.CANCELED);
     }

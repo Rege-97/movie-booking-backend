@@ -4,6 +4,7 @@ import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,7 @@ public class ScreeningResponse {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer totalSeats;
+    @Setter
     private Integer availableSeats;
     private ScreeningStatus status;
 
