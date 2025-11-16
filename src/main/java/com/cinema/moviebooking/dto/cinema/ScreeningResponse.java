@@ -2,14 +2,14 @@ package com.cinema.moviebooking.dto.cinema;
 
 import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ScreeningResponse {
 
     private Long screeningId;

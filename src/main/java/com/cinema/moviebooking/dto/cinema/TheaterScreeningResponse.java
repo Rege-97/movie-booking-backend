@@ -2,13 +2,17 @@ package com.cinema.moviebooking.dto.cinema;
 
 import com.cinema.moviebooking.entity.ScreenType;
 import com.cinema.moviebooking.entity.Theater;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TheaterScreeningResponse {
     private Long theaterId;
     private String theaterName;

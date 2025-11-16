@@ -1,5 +1,9 @@
 package com.cinema.moviebooking.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,22 +21,36 @@ import java.util.Map;
 @Configuration
 public class RedisCacheConfig {
 
+    @Bean
+    public ObjectMapper objectMapper() {
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .allowIfBaseType(Object.class)
+                .build();
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
+        return mapper;
+    }
+
     // 캐시 설정을 생성하는 헬퍼 메서드
-    private RedisCacheConfiguration createCacheConfiguration(Duration ttl) {
+    private RedisCacheConfiguration createCacheConfiguration(Duration ttl, ObjectMapper objectMapper) {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(ttl)
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer(objectMapper)
+                ));
     }
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
         // 기본 캐시 설정
-        RedisCacheConfiguration defaultConf = createCacheConfiguration(Duration.ofHours(1));
+        RedisCacheConfiguration defaultConf = createCacheConfiguration(Duration.ofHours(1), objectMapper);
 
         // 상영 스케쥴 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("cinemaScreening", createCacheConfiguration(Duration.ofMinutes(10)));
+        cacheConfigurations.put("cinemaScreening", createCacheConfiguration(Duration.ofMinutes(10), objectMapper));
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConf)
