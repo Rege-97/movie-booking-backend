@@ -38,14 +38,17 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
 
     @Override
     public List<Screening> findValidByCinemaAndDate(Long cinemaId, LocalDate screeningDate) {
+
+        LocalDateTime startOfDay = screeningDate.atStartOfDay();
+        LocalDateTime endOfDay = screeningDate.atTime(23, 59, 59);
+
         return queryFactory
                 .selectFrom(screening)
                 .join(screening.theater, theater).fetchJoin()
                 .join(screening.movie, movie).fetchJoin()
-                .join(theater.cinema, cinema)
                 .where(
-                        cinema.id.eq(cinemaId),
-                        screeningDateEq(screeningDate),
+                        theater.cinema.id.eq(cinemaId),
+                        screening.startTime.between(startOfDay, endOfDay),
                         screening.status.eq(ScreeningStatus.SCHEDULED),
                         screening.startTime.goe(LocalDateTime.now())
                 )
@@ -86,12 +89,6 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 )
                 .set(screening.status, ScreeningStatus.SCHEDULED)
                 .execute();
-    }
-
-    private BooleanExpression screeningDateEq(LocalDate screeningDate) {
-        return screening.startTime.year().eq(screeningDate.getYear())
-                .and(screening.startTime.month().eq(screeningDate.getMonthValue()))
-                .and(screening.startTime.dayOfMonth().eq(screeningDate.getDayOfMonth()));
     }
 
     /**
