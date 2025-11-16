@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.cinema.moviebooking.entity.QCinema.cinema;
+import static com.cinema.moviebooking.entity.QMovie.movie;
 import static com.cinema.moviebooking.entity.QScreening.screening;
 import static com.cinema.moviebooking.entity.QTheater.theater;
 
@@ -39,7 +40,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
     public List<Screening> findValidByCinemaAndDate(Long cinemaId, LocalDate screeningDate) {
         return queryFactory
                 .selectFrom(screening)
-                .join(screening.theater, theater)
+                .join(screening.theater, theater).fetchJoin()
+                .join(screening.movie, movie).fetchJoin()
                 .join(theater.cinema, cinema)
                 .where(
                         cinema.id.eq(cinemaId),

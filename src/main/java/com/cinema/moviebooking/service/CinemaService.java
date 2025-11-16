@@ -142,10 +142,10 @@ public class CinemaService {
     }
 
     /**
-     * 영화관별 상영관 목록 조회
+     * 영화관별 상영스케줄 목록 조회
      * - 영화관 존재 여부 검증
-     * - 해당 영화관의 상영관 데이터 조회
-     * - 상영관 목록과 영화관 정보를 반환
+     * - 해당 영화관별 상영스케줄 데이터 조회
+     * - 영화관별 상영스케줄 정보를 반환
      */
     @Transactional(readOnly = true)
     public CinemaScreeningResponse getCinemaScreening(Long id, LocalDate screeningDate) {
