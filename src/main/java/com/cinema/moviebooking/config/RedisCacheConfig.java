@@ -21,8 +21,7 @@ import java.util.Map;
 @Configuration
 public class RedisCacheConfig {
 
-    @Bean
-    public ObjectMapper objectMapper() {
+    private ObjectMapper createRedisObjectMapper() {
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class)
                 .build();
@@ -44,13 +43,15 @@ public class RedisCacheConfig {
     }
 
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, ObjectMapper objectMapper) {
+    public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+
+        ObjectMapper redisObjectMapper = createRedisObjectMapper();
         // 기본 캐시 설정
-        RedisCacheConfiguration defaultConf = createCacheConfiguration(Duration.ofHours(1), objectMapper);
+        RedisCacheConfiguration defaultConf = createCacheConfiguration(Duration.ofHours(1), redisObjectMapper);
 
         // 상영 스케쥴 설정
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("cinemaScreening", createCacheConfiguration(Duration.ofMinutes(10), objectMapper));
+        cacheConfigurations.put("cinemaScreening", createCacheConfiguration(Duration.ofMinutes(10), redisObjectMapper));
 
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(defaultConf)

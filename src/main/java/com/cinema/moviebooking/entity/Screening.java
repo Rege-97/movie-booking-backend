@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "screening", indexes = {
-        @Index(name = "idx_screening_theater_status_start", columnList = "theater_id, status, startTime")
+        @Index(name = "idx_screening_theater_status_start", columnList = "theater_id, status, startTime"),
+        @Index(name = "idx_screening_status", columnList = "status")
 })
 public class Screening extends BaseTimeEntity {
 
@@ -38,10 +39,10 @@ public class Screening extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ScreeningStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theater theater;
 
     @Builder
