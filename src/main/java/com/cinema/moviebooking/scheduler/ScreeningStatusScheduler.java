@@ -4,6 +4,7 @@ import com.cinema.moviebooking.repository.screening.ScreeningRepository;
 import com.cinema.moviebooking.util.QueryCounter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,9 @@ import java.time.LocalDateTime;
 public class ScreeningStatusScheduler {
 
     private final ScreeningRepository screeningRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String SEAT_COUNT_KEY = "screening:seats";
 
     /**
      * 상영 상태 자동 업데이트
@@ -23,7 +27,7 @@ public class ScreeningStatusScheduler {
      * - 상영 시작(SCHEDULED → ONGOING)
      * - 상영 종료(ONGOING → COMPLETED)
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(initialDelay = 180000, fixedRate = 60000)
     @Transactional
     public void updateScreeningStatus() {
 

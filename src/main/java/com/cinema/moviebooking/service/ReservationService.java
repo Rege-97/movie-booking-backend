@@ -10,6 +10,7 @@ import com.cinema.moviebooking.repository.reservation.ReservedSeatRepository;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
 import com.cinema.moviebooking.repository.seat.SeatRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,9 @@ public class ReservationService {
     private final SeatRepository seatRepository;
     private final ReservationRepository reservationRepository;
     private final ReservedSeatRepository reservedSeatRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String SEAT_COUNT_KEY = "screening:seats";
 
     /**
      * 예매 생성
@@ -64,6 +68,18 @@ public class ReservationService {
             throw new InvalidStateException("이미 예매된 좌석이 포함되어 있습니다: " + reservedSeatIds);
         }
 
+        long reservedCount = (long) req.getSeatIdList().size();
+        Long newAvailableCount = redisTemplate.opsForHash().increment(
+                SEAT_COUNT_KEY,
+                req.getScreeningId().toString(),
+                -reservedCount
+        );
+
+        if (newAvailableCount < 0) {
+            redisTemplate.opsForHash().increment(SEAT_COUNT_KEY, req.getScreeningId().toString(), reservedCount);
+            throw new InvalidStateException("좌석이 부족합니다.");
+        }
+
         // 예매 생성
         Reservation reservation = Reservation.builder()
                 .status(ReservationStatus.CONFIRMED)
@@ -87,7 +103,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         // 남은 좌석 수 갱신
-        screening.updateAvailableSeats(screening.getAvailableSeats() - seats.size());
+        screening.updateAvailableSeats(newAvailableCount.intValue());
 
         return ReservationCreateResponse.builder()
                 .reservationId(reservation.getId())
@@ -176,8 +192,14 @@ public class ReservationService {
             throw new InvalidStateException("상영 시작 15분 전까지만 예매를 취소할 수 있습니다.");
         }
 
-        int canceledSeatCount = reservation.getReservedSeats().size();
-        screening.updateAvailableSeats(screening.getAvailableSeats() + canceledSeatCount);
+        long canceledSeatCount = reservation.getReservedSeats().size();
+        Long newAvailableCount = redisTemplate.opsForHash().increment(
+                SEAT_COUNT_KEY,
+                screening.getId().toString(),
+                (long) canceledSeatCount
+        );
+
+        screening.updateAvailableSeats(newAvailableCount.intValue());
 
         reservation.updateState(ReservationStatus.CANCELLED);
     }

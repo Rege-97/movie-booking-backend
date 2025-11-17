@@ -2,13 +2,17 @@ package com.cinema.moviebooking.dto.cinema;
 
 import com.cinema.moviebooking.entity.Movie;
 import com.cinema.moviebooking.entity.Rating;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieScreeningResponse {
 
     private Long movieId;

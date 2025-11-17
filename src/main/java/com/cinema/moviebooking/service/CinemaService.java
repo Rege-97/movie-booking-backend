@@ -11,11 +11,15 @@ import com.cinema.moviebooking.repository.cinema.CinemaRepository;
 import com.cinema.moviebooking.repository.movie.MovieRepository;
 import com.cinema.moviebooking.repository.screening.ScreeningRepository;
 import com.cinema.moviebooking.repository.theater.TheaterRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,13 +29,30 @@ import java.util.stream.Collectors;
  * (영화관 등록, 조회, 수정, 삭제 등)
  */
 @Service
-@RequiredArgsConstructor
 public class CinemaService {
 
     private final CinemaRepository cinemaRepository;
     private final TheaterRepository theaterRepository;
     private final MovieRepository movieRepository;
     private final ScreeningRepository screeningRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final CinemaService self;
+
+    private static final String SEAT_COUNT_KEY = "screening:seats";
+
+    public CinemaService(CinemaRepository cinemaRepository,
+                         TheaterRepository theaterRepository,
+                         MovieRepository movieRepository,
+                         ScreeningRepository screeningRepository,
+                         RedisTemplate<String, String> redisTemplate,
+                         @Lazy CinemaService self) {
+        this.cinemaRepository = cinemaRepository;
+        this.theaterRepository = theaterRepository;
+        this.movieRepository = movieRepository;
+        this.screeningRepository = screeningRepository;
+        this.redisTemplate = redisTemplate;
+        this.self = self;
+    }
 
     /**
      * 영화관 등록
@@ -149,6 +170,55 @@ public class CinemaService {
      */
     @Transactional(readOnly = true)
     public CinemaScreeningResponse getCinemaScreening(Long id, LocalDate screeningDate) {
+        // 1. 'self'를 통해 @Cacheable 헬퍼 메서드 호출
+        //    (캐시가 있으면 10분간 DB 접근 없이 즉시 반환, 없으면 DB 조회 후 캐시)
+        CinemaScreeningResponse response = self.getAndCacheCinemaScreeningData(id, screeningDate);
+
+        // 2. 반환된 DTO(캐시 또는 DB)에서 모든 ScreeningResponse DTO 리스트를 추출
+        List<ScreeningResponse> allScreeningResponses = response.getMovieScreenings().stream()
+                .flatMap(movieScreening -> movieScreening.getTheaterScreenings().stream())
+                .flatMap(theaterScreening -> theaterScreening.getScreenings().stream())
+                .toList();
+
+        if (allScreeningResponses.isEmpty()) {
+            return response; // 스케줄이 없으면 바로 반환
+        }
+
+        // 3. 추출된 DTO에서 screeningId 목록 생성
+        List<String> screeningIds = allScreeningResponses.stream()
+                .map(s -> s.getScreeningId().toString())
+                .toList();
+
+        // 4. Redis에 'HMGET'으로 모든 좌석 수를 '한 번에' 조회
+        List<Object> idObjects = new ArrayList<>(screeningIds);
+        List<Object> seatCounts = redisTemplate.opsForHash().multiGet(SEAT_COUNT_KEY, idObjects);
+
+        // 5. ID-좌석수 Map 생성
+        Map<Long, Integer> seatCountMap = new HashMap<>();
+        for (int i = 0; i < screeningIds.size(); i++) {
+            Object countObj = seatCounts.get(i);
+            if (countObj != null) {
+                seatCountMap.put(Long.parseLong(screeningIds.get(i)), Integer.parseInt(countObj.toString()));
+            }
+        }
+
+        // 6. DTO의 'availableSeats'를 '실시간' 값으로 덮어쓰기 (Merge)
+        allScreeningResponses.forEach(s -> {
+            Integer realTimeCount = seatCountMap.get(s.getScreeningId());
+            if (realTimeCount != null) {
+                s.setAvailableSeats(realTimeCount);
+            }
+        });
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "cinemaScreening",
+            key = "'cinema-' + #id + '-date-' + #screeningDate.toString()",
+            unless = "#result == null")
+    public CinemaScreeningResponse getAndCacheCinemaScreeningData(Long id, LocalDate screeningDate) {
+
         Cinema cinema = cinemaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
 
