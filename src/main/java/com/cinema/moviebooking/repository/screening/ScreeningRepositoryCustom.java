@@ -1,6 +1,7 @@
 package com.cinema.moviebooking.repository.screening;
 
 import com.cinema.moviebooking.entity.Screening;
+import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
 
 import java.time.LocalDate;
@@ -12,9 +13,6 @@ public interface ScreeningRepositoryCustom {
 
     List<Screening> findValidByCinemaAndDate(Long cinemaId, LocalDate screeningDate);
 
-    Long updateToOngoingIfStarted(LocalDateTime now);
-
-    Long updateToCompletedIfEnded(LocalDateTime now);
-
-    Long updateToScheduledIfOpenTimeReached(LocalDateTime now);
+    Long bulkUpdateStatus(List<Long> ids, ScreeningStatus fromStatus, ScreeningStatus toStatus);
 }
+
