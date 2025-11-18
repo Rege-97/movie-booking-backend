@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -36,6 +37,7 @@ public class ScreeningService {
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String SEAT_COUNT_KEY = "screening:seats";
+    private static final String SCREENING_TASK_KEY = "screening:tasks";
 
     /**
      * 상영스케쥴 등록
@@ -84,6 +86,24 @@ public class ScreeningService {
                 theater.getSeatCount().toString()
         );
 
+        String screeningId = screening.getId().toString();
+        redisTemplate.opsForZSet().add(
+                SCREENING_TASK_KEY,
+                screeningId + ":OPEN",
+                req.getOpenTime().toEpochSecond(ZoneOffset.UTC)
+        );
+        redisTemplate.opsForZSet().add(
+                SCREENING_TASK_KEY,
+                screeningId + ":START",
+                startTime.toEpochSecond(ZoneOffset.UTC)
+        );
+        redisTemplate.opsForZSet().add(
+                SCREENING_TASK_KEY,
+                screeningId + ":END",
+                endTime.toEpochSecond(ZoneOffset.UTC)
+        );
+
+
         return new ScreeningCreateResponse(screening.getId());
     }
 
@@ -104,6 +124,13 @@ public class ScreeningService {
             throw new InvalidStateException("상영 중이거나 이미 완료·취소된 상영은 취소할 수 없습니다.");
         }
         redisTemplate.opsForHash().delete(SEAT_COUNT_KEY, id.toString());
+        String screeningId = id.toString();
+        redisTemplate.opsForZSet().remove(
+                SCREENING_TASK_KEY,
+                screeningId + ":OPEN",
+                screeningId + ":START",
+                screeningId + ":END"
+        );
 
         screening.updateStatus(ScreeningStatus.CANCELED);
     }

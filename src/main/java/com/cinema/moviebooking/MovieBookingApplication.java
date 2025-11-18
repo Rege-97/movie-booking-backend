@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableCaching
 @EnableJpaAuditing
-//@EnableScheduling
+@EnableScheduling
 @SpringBootApplication
 public class MovieBookingApplication {
 
