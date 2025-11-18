@@ -15,6 +15,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Component
@@ -24,6 +25,7 @@ public class ScreeningStatusScheduler {
     private final ScreeningRepository screeningRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final TransactionTemplate transactionTemplate;
+    private final AtomicBoolean schedulerReadyFlag;
 
     private static final String SCREENING_TASK_KEY = "screening:tasks";
     private static final int BATCH_SIZE = 3000;
@@ -34,8 +36,13 @@ public class ScreeningStatusScheduler {
      * - 상영 시작(SCHEDULED → ONGOING)
      * - 상영 종료(ONGOING → COMPLETED)
      */
-    @Scheduled(initialDelay = 50000, fixedDelay = 60000)
+    @Scheduled(fixedRate = 60000)
     public void processScreeningTasks() {
+        if (!schedulerReadyFlag.get()) {
+            log.warn("AdminInitializer가 아직 완료되지 않았습니다. 스케줄러를 건너뜁니다.");
+            return;
+        }
+
         QueryCounter.start();
         long start = System.currentTimeMillis();
         long totalProcessed = 0L;
@@ -95,19 +102,22 @@ public class ScreeningStatusScheduler {
             }
             long openCount = 0L;
             if (!openIds.isEmpty()) {
-                openCount = screeningRepository.bulkUpdateStatus(openIds, ScreeningStatus.PENDING, ScreeningStatus.SCHEDULED);
+                openCount = screeningRepository.bulkUpdateStatus(openIds, ScreeningStatus.PENDING,
+                        ScreeningStatus.SCHEDULED);
             }
 
             long startCount = 0L;
             if (!startIds.isEmpty()) {
-                startCount = screeningRepository.bulkUpdateStatus(startIds, ScreeningStatus.SCHEDULED, ScreeningStatus.ONGOING);
+                startCount = screeningRepository.bulkUpdateStatus(startIds, ScreeningStatus.SCHEDULED,
+                        ScreeningStatus.ONGOING);
             }
 
             long endCount = 0L;
             if (!endIds.isEmpty()) {
-                endCount = screeningRepository.bulkUpdateStatus(endIds, ScreeningStatus.ONGOING, ScreeningStatus.COMPLETED);
+                endCount = screeningRepository.bulkUpdateStatus(endIds, ScreeningStatus.ONGOING,
+                        ScreeningStatus.COMPLETED);
             }
-            return  openCount + startCount + endCount;
+            return openCount + startCount + endCount;
         });
     }
 }

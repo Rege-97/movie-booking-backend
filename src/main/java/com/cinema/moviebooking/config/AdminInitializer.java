@@ -18,12 +18,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /**
@@ -38,6 +38,7 @@ public class AdminInitializer {
     private final ScreeningRepository screeningRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final AdminInitializer self;
+    private final AtomicBoolean schedulerReadyFlag;
 
     @Value("${admin.email}")
     private String adminEmail;
@@ -54,18 +55,20 @@ public class AdminInitializer {
                             PasswordEncoder passwordEncoder,
                             ScreeningRepository screeningRepository,
                             RedisTemplate<String, String> redisTemplate,
-                            @Lazy AdminInitializer self) {
+                            @Lazy AdminInitializer self,
+                            AtomicBoolean schedulerReadyFlag) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.screeningRepository = screeningRepository;
         this.redisTemplate = redisTemplate;
         this.self = self;
+        this.schedulerReadyFlag = schedulerReadyFlag;
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void initializeData() {
         self.createAdmin();
-//        self.populateRedisSeatCounters();
+        self.populateRedisSeatCounters();
         self.populateRedisScreeningTasks();
     }
 
@@ -126,8 +129,6 @@ public class AdminInitializer {
         redisTemplate.delete(SCREENING_TASK_KEY);
         log.warn("기존 Redis 스케줄러 작업({})을 삭제했습니다.", SCREENING_TASK_KEY);
 
-        LocalDateTime now = LocalDateTime.now();
-
         final Set<ZSetOperations.TypedTuple<String>> batchTasks = new HashSet<>(5000); // 5000개 단위
         final int[] totalCount = {0};
 
@@ -167,6 +168,7 @@ public class AdminInitializer {
                 redisTemplate.opsForZSet().add(SCREENING_TASK_KEY, batchTasks);
             }
             log.info("Redis 스케줄러에 {}개의 상영 스케줄 작업을 새로 등록했습니다.", totalCount[0]);
+            schedulerReadyFlag.set(true);
         } catch (Exception e) {
             log.error("Redis 스케줄러 작업 동기화 중 오류 발생", e);
         }
