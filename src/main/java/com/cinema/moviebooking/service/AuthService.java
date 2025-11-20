@@ -76,16 +76,7 @@ public class AuthService {
             throw new InvalidCredentialsException("아이디 또는 비밀번호가 틀렸습니다.");
         }
 
-        // 토큰 발급
-        String accessToken = jwtTokenProvider.generateAccessToken(member);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(member);
-
-        String key = getRefreshTokenKey(member.getId());
-        Duration expiration = Duration.ofMillis(jwtTokenProvider.getRefreshExpirationMs());
-
-        redisTemplate.opsForValue().set(key, refreshToken, expiration);
-
-        return LoginResponse.from(member, accessToken, refreshToken);
+        return generateAndStoreTokens(member);
     }
 
     /**
@@ -104,5 +95,47 @@ public class AuthService {
         String blacklistKey = BLACKLIST_PREFIX + accessToken;
 
         redisTemplate.opsForValue().set(blacklistKey, "logout", expiration);
+    }
+
+    /**
+     * Access Token 재발급
+     * - Refresh Token 유효성 검증
+     * - Redis에 저장된 Refresh Token과 일치하는지 확인 (토큰 탈취 방지)
+     * - 새로운 Access/Refresh Token 발급 및 Redis 업데이트
+     */
+    @Transactional
+    public LoginResponse reissueTokens(String refreshToken) {
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new InvalidCredentialsException("유효하지 않은 Refresh Token입니다.");
+        }
+
+        String email = jwtTokenProvider.getSubject(refreshToken);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+
+        String storedRefreshToken = redisTemplate.opsForValue().get(getRefreshTokenKey(member.getId()));
+
+        if (!refreshToken.equals(storedRefreshToken)) {
+            if (storedRefreshToken != null) {
+                redisTemplate.delete(getRefreshTokenKey(member.getId()));
+            }
+            throw new InvalidCredentialsException("Refresh Token 정보가 일치하지 않거나 만료되었습니다.");
+        }
+
+        return generateAndStoreTokens(member);
+    }
+
+    private LoginResponse generateAndStoreTokens(Member member) {
+        // 토큰 발급
+        String accessToken = jwtTokenProvider.generateAccessToken(member);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(member);
+
+        // Redis에 Refresh 토큰 저장 및 만료 시간 설정
+        String key = getRefreshTokenKey(member.getId());
+        Duration expiration = Duration.ofMillis(jwtTokenProvider.getRefreshExpirationMs());
+
+        redisTemplate.opsForValue().set(key, refreshToken, expiration);
+
+        return LoginResponse.from(member, accessToken, refreshToken);
     }
 }

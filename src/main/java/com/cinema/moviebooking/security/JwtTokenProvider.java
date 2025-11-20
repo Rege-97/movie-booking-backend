@@ -80,4 +80,16 @@ public class JwtTokenProvider {
                 .getPayload()
                 .get("role", String.class);
     }
+
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(authToken);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }
