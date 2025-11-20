@@ -68,6 +68,7 @@ public class ReservationService {
             throw new InvalidStateException("이미 예매된 좌석이 포함되어 있습니다: " + reservedSeatIds);
         }
 
+        // Redis 좌석 차감
         long reservedCount = (long) req.getSeatIdList().size();
         Long newAvailableCount = redisTemplate.opsForHash().increment(
                 SEAT_COUNT_KEY,
@@ -75,44 +76,58 @@ public class ReservationService {
                 -reservedCount
         );
 
+        // Redis 상에서 좌석이 부족하면 즉시 원복 후 실패 처리
         if (newAvailableCount < 0) {
             redisTemplate.opsForHash().increment(SEAT_COUNT_KEY, req.getScreeningId().toString(), reservedCount);
             throw new InvalidStateException("좌석이 부족합니다.");
         }
-
-        // 예매 생성
-        Reservation reservation = Reservation.builder()
-                .status(ReservationStatus.CONFIRMED)
-                .member(Member)
-                .screening(screening)
-                .build();
-
-        List<String> seatNames = new ArrayList<>();
-
-        for (Seat seat : seats) {
-            seatNames.add(seat.getSeatRow().toString() + seat.getSeatNumber());
-
-            ReservedSeat reservedSeat = ReservedSeat.builder()
-                    .reservation(reservation)
-                    .seat(seat)
+        try {
+            // 예매 생성
+            Reservation reservation = Reservation.builder()
+                    .status(ReservationStatus.CONFIRMED)
+                    .member(Member)
+                    .screening(screening)
                     .build();
 
-            reservation.addReservedSeat(reservedSeat);
+            List<String> seatNames = new ArrayList<>();
+
+            for (Seat seat : seats) {
+                seatNames.add(seat.getSeatRow().toString() + seat.getSeatNumber());
+
+                ReservedSeat reservedSeat = ReservedSeat.builder()
+                        .reservation(reservation)
+                        .seat(seat)
+                        .screening(screening)
+                        .build();
+
+                reservation.addReservedSeat(reservedSeat);
+            }
+
+            reservationRepository.save(reservation);
+
+            // 남은 좌석 수 갱신
+            screening.updateAvailableSeats(newAvailableCount.intValue());
+
+            reservationRepository.flush();
+
+            return ReservationCreateResponse.builder()
+                    .reservationId(reservation.getId())
+                    .theaterName(screening.getTheater().getName())
+                    .movieTitle(screening.getMovie().getTitle())
+                    .status(reservation.getStatus())
+                    .seatNames(seatNames)
+                    .screeningTime(screening.getStartTime())
+                    .build();
+
+        } catch (Exception e) {
+            redisTemplate.opsForHash().increment(
+                    SEAT_COUNT_KEY,
+                    req.getScreeningId().toString(),
+                    reservedCount
+            );
+            // 상위(Controller)로 예외를 다시 던져서 트랜잭션 롤백 및 에러 응답 유도
+            throw e;
         }
-
-        reservationRepository.save(reservation);
-
-        // 남은 좌석 수 갱신
-        screening.updateAvailableSeats(newAvailableCount.intValue());
-
-        return ReservationCreateResponse.builder()
-                .reservationId(reservation.getId())
-                .theaterName(screening.getTheater().getName())
-                .movieTitle(screening.getMovie().getTitle())
-                .status(reservation.getStatus())
-                .seatNames(seatNames)
-                .screeningTime(screening.getStartTime())
-                .build();
     }
 
     /**

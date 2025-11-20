@@ -5,6 +5,7 @@ import com.cinema.moviebooking.dto.reservation.MyReservationCursorResponse;
 import com.cinema.moviebooking.dto.reservation.ReservationCreateRequest;
 import com.cinema.moviebooking.dto.reservation.ReservationCreateResponse;
 import com.cinema.moviebooking.entity.Member;
+import com.cinema.moviebooking.service.RedissonLockReservationFacade;
 import com.cinema.moviebooking.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final RedissonLockReservationFacade reservationFacade;
 
     /**
      * 영화 예매 처리
@@ -33,7 +35,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<?> createReservation(@Valid @RequestBody ReservationCreateRequest req,
                                                @AuthenticationPrincipal Member member) {
-        ReservationCreateResponse res = reservationService.createReservation(member, req);
+        ReservationCreateResponse res = reservationFacade.createReservation(member, req);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(res, "영화 예매가 완료되었습니다."));
     }

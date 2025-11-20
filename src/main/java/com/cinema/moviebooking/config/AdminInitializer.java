@@ -70,6 +70,7 @@ public class AdminInitializer {
         self.createAdmin();
         self.populateRedisSeatCounters();
         self.populateRedisScreeningTasks();
+        schedulerReadyFlag.set(true);
     }
 
     @Transactional
@@ -168,7 +169,7 @@ public class AdminInitializer {
                 redisTemplate.opsForZSet().add(SCREENING_TASK_KEY, batchTasks);
             }
             log.info("Redis 스케줄러에 {}개의 상영 스케줄 작업을 새로 등록했습니다.", totalCount[0]);
-            schedulerReadyFlag.set(true);
+
         } catch (Exception e) {
             log.error("Redis 스케줄러 작업 동기화 중 오류 발생", e);
         }
