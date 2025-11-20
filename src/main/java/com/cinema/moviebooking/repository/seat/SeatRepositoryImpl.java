@@ -7,10 +7,12 @@ import com.cinema.moviebooking.entity.Seat;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.cinema.moviebooking.entity.QScreening.screening;
 import static com.cinema.moviebooking.entity.QSeat.seat;
@@ -20,6 +22,7 @@ import static com.cinema.moviebooking.entity.QSeat.seat;
 public class SeatRepositoryImpl implements SeatRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
 
     /**
      * 특정 상영(screeningId)에 대해
@@ -50,5 +53,31 @@ public class SeatRepositoryImpl implements SeatRepositoryCustom {
                         seat.id.notIn(reservedSeatIdsSubQuery)
                 )
                 .fetch();
+    }
+
+    @Override
+    public void bulkInsertSeats(List<Seat> seatsToInsert) {
+        if (seatsToInsert == null || seatsToInsert.isEmpty()) {
+            return;
+        }
+
+        final String now = "NOW()";
+
+        StringBuilder sql = new StringBuilder("INSERT INTO seat (seat_row, seat_number, theater_id, created_at, updated_at) VALUES ");
+
+        List<String> values = seatsToInsert.stream()
+                .map(seat -> String.format("('%c', %d, %d, %s, %s)",
+                        seat.getSeatRow(),
+                        seat.getSeatNumber(),
+                        seat.getTheater().getId(),
+                        now,
+                        now))
+                .collect(Collectors.toList());
+
+        sql.append(String.join(", ", values));
+
+        em.createNativeQuery(sql.toString()).executeUpdate();
+
+        em.clear();
     }
 }

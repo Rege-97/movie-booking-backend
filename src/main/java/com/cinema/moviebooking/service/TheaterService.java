@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 상영관 관련 비즈니스 로직 처리
  * (상영관 등록, 수정, 삭제 등)
@@ -57,6 +60,7 @@ public class TheaterService {
         theaterRepository.save(theater);
 
         char seatRow = 'A';
+        List<Seat> seatsToInsert = new ArrayList<>();
 
         for (int i = 1; i <= req.getSeatRowCount(); i++) {
             for (int j = 1; j <= req.getSeatColumnCount(); j++) {
@@ -65,11 +69,12 @@ public class TheaterService {
                         .seatNumber(j)
                         .theater(theater)
                         .build();
-
-                theater.addSeat(seat);
+                seatsToInsert.add(seat);
             }
             seatRow++;
         }
+
+        seatRepository.bulkInsertSeats(seatsToInsert);
 
         log.info("상영관 [{}] 등록 완료 - 총 {}석 ({}행 × {}열)",
                 theater.getName(),
