@@ -68,7 +68,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .set(screening.status, toStatus)
                 .where(
                         screening.id.in(ids),
-                        screening.status.eq(fromStatus)
+                        screening.status.eq(fromStatus),
+                        screening.deletedAt.isNull()
                 )
                 .execute();
     }
