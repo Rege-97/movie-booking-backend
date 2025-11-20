@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface SeatRepositoryCustom {
     List<Seat> findAvailableSeatsByScreening(Long screeningId);
+
+    void bulkInsertSeats(List<Seat> seatsToInsert);
 }
