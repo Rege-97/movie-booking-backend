@@ -12,9 +12,12 @@ import com.cinema.moviebooking.exception.NotFoundException;
 import com.cinema.moviebooking.repository.member.MemberRepository;
 import com.cinema.moviebooking.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
 
 /**
  * 인증 관련 비즈니스 로직 처리
@@ -27,6 +30,13 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    private static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
+
+    private String getRefreshTokenKey(Long memberId) {
+        return REFRESH_TOKEN_PREFIX + memberId;
+    }
 
     /**
      * 회원가입
@@ -69,7 +79,10 @@ public class AuthService {
         String accessToken = jwtTokenProvider.generateAccessToken(member);
         String refreshToken = jwtTokenProvider.generateRefreshToken(member);
 
-        member.updateRefreshToken(refreshToken);
+        String key = getRefreshTokenKey(member.getId());
+        Duration expiration = Duration.ofMillis(jwtTokenProvider.getRefreshExpirationMs());
+
+        redisTemplate.opsForValue().set(key, refreshToken, expiration);
 
         return LoginResponse.from(member, accessToken, refreshToken);
     }
@@ -83,7 +96,7 @@ public class AuthService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("회원"));
 
-        // refresh token 제거
-        member.updateRefreshToken(null);
+        String key = getRefreshTokenKey(memberId);
+        redisTemplate.delete(key);
     }
 }

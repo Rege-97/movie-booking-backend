@@ -3,7 +3,6 @@ package com.cinema.moviebooking.repository.screening;
 import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.cinema.moviebooking.entity.QCinema.cinema;
 import static com.cinema.moviebooking.entity.QMovie.movie;
 import static com.cinema.moviebooking.entity.QScreening.screening;
 import static com.cinema.moviebooking.entity.QTheater.theater;
