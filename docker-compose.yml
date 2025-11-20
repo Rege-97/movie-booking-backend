@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: movie-booking-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://[RDS_ENDPOINT]:3306/movie_db
+      - SPRING_DATASOURCE_USERNAME=[RDS_USERNAME]
+      - SPRING_DATASOURCE_PASSWORD=[RDS_PASSWORD]
+      - SPRING_DATA_REDIS_HOST=[REDIS_HOST]
+      - SPRING_DATA_REDIS_PORT=6379

@@ -1,10 +1,8 @@
 package com.cinema.moviebooking.controller;
 
 import com.cinema.moviebooking.common.response.ApiResponse;
-import com.cinema.moviebooking.dto.auth.LoginRequest;
-import com.cinema.moviebooking.dto.auth.LoginResponse;
-import com.cinema.moviebooking.dto.auth.SignUpRequest;
-import com.cinema.moviebooking.dto.auth.SignUpResponse;
+import com.cinema.moviebooking.dto.auth.*;
+import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.security.CustomUserDetails;
 import com.cinema.moviebooking.service.AuthService;
 import jakarta.validation.Valid;
@@ -12,10 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * 인증 관련 요청을 처리하는 컨트롤러
@@ -58,8 +55,20 @@ public class AuthController {
      * - 로그아웃 성공 시 204(No Content) 반환
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails member) {
-        authService.logout(member.getId());
+    public ResponseEntity<?> logout(@AuthenticationPrincipal Member member,
+                                    @RequestHeader("Authorization") String authorizationHeader) {
+        authService.logout(member.getId(), authorizationHeader.substring(7));
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Access Token 재발급 요청 처리 (Refresh Token 사용)
+     * - 요청 바디에서 Refresh Token 추출
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@Valid @RequestBody RefreshRequest req) {
+        LoginResponse res = authService.reissueTokens(req.getRefreshToken());
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "Access Token이 재발급되었습니다."));
     }
 }

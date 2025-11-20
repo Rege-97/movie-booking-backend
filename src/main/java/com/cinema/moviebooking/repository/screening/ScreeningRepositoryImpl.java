@@ -3,7 +3,6 @@ package com.cinema.moviebooking.repository.screening;
 import com.cinema.moviebooking.entity.Screening;
 import com.cinema.moviebooking.entity.ScreeningStatus;
 import com.cinema.moviebooking.entity.Theater;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.cinema.moviebooking.entity.QCinema.cinema;
 import static com.cinema.moviebooking.entity.QMovie.movie;
 import static com.cinema.moviebooking.entity.QScreening.screening;
 import static com.cinema.moviebooking.entity.QTheater.theater;
@@ -31,7 +29,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .where(
                         screening.theater.eq(theater),
                         screening.startTime.before(endTime),
-                        screening.endTime.after(startTime)
+                        screening.endTime.after(startTime),
+                        screening.deletedAt.isNull()
                 )
                 .fetchFirst() != null;
     }
@@ -50,7 +49,10 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                         theater.cinema.id.eq(cinemaId),
                         screening.startTime.between(startOfDay, endOfDay),
                         screening.status.eq(ScreeningStatus.SCHEDULED),
-                        screening.startTime.goe(LocalDateTime.now())
+                        screening.startTime.goe(LocalDateTime.now()),
+                        screening.deletedAt.isNull(),
+                        theater.deletedAt.isNull(),
+                        movie.deletedAt.isNull()
                 )
                 .fetch();
     }
@@ -66,7 +68,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .set(screening.status, toStatus)
                 .where(
                         screening.id.in(ids),
-                        screening.status.eq(fromStatus)
+                        screening.status.eq(fromStatus),
+                        screening.deletedAt.isNull()
                 )
                 .execute();
     }

@@ -60,7 +60,7 @@ public class CinemaService {
      */
     @Transactional
     public CinemaCreateResponse createCinema(CinemaCreateRequest req) {
-        if (cinemaRepository.existsByName(req.getName())) {
+        if (cinemaRepository.existsByNameAndDeletedAtIsNull(req.getName())) {
             throw new DuplicateResourceException("이미 존재하는 영화관 이름입니다.");
         }
 

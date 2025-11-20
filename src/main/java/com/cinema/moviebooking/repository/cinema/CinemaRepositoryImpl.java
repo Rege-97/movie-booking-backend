@@ -24,7 +24,8 @@ public class CinemaRepositoryImpl implements CinemaRepositoryCustom {
                 .where(
                         nameContains(keyword),
                         regionEq(region),
-                        idLt(lastId)
+                        idLt(lastId),
+                        cinema.deletedAt.isNull()
                 )
                 .orderBy(cinema.id.desc())
                 .limit(size + 1)
