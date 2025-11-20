@@ -12,6 +12,9 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = {
+        @Index(name = "idx_reservation_member_id_id", columnList = "member_id, id")
+})
 public class Reservation extends BaseTimeEntity {
 
     @Id
