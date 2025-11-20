@@ -50,7 +50,9 @@ public class SeatRepositoryImpl implements SeatRepositoryCustom {
                 .join(screening).on(seat.theater.eq(screening.theater))
                 .where(
                         screening.id.eq(screeningId),
-                        seat.id.notIn(reservedSeatIdsSubQuery)
+                        seat.id.notIn(reservedSeatIdsSubQuery),
+                        seat.deletedAt.isNull(),
+                        screening.theater.deletedAt.isNull()
                 )
                 .fetch();
     }

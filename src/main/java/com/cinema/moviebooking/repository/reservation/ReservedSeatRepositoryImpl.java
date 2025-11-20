@@ -27,7 +27,8 @@ public class ReservedSeatRepositoryImpl implements ReservedSeatRepositoryCustom 
                 .where(
                         reservation.screening.id.eq(screeningId),
                         reservation.status.eq(ReservationStatus.CONFIRMED),
-                        seat.id.in(seatIds)
+                        seat.id.in(seatIds),
+                        seat.deletedAt.isNull()
                 )
                 .fetch();
     }

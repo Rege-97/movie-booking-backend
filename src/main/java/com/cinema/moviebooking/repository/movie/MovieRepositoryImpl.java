@@ -28,7 +28,8 @@ public class MovieRepositoryImpl implements MovieRepositoryCustom {
                         ratingEq(rating),
                         releaseYearEq(releaseYear),
                         nowShowingEq(nowShowing),
-                        idLt(lastId)
+                        idLt(lastId),
+                        movie.deletedAt.isNull()
                 )
                 .orderBy(movie.id.desc())
                 .limit(size + 1)

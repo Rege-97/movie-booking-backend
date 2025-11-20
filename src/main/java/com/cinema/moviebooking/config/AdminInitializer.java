@@ -77,7 +77,7 @@ public class AdminInitializer {
     public void createAdmin() {
 
         // 이미 관리자 계정이 있으면 생성하지 않음
-        if (memberRepository.existsByEmail(adminEmail)) {
+        if (memberRepository.existsByEmailAndDeletedAtIsNull(adminEmail)) {
             return;
         }
 

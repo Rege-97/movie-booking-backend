@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface TheaterRepository extends JpaRepository<Theater, Long> {
 
-    boolean existsByCinemaAndName(Cinema cinema, String name);
+    boolean existsByCinemaAndNameAndDeletedAtIsNull(Cinema cinema, String name);
 
     List<Theater> findByCinemaId(Long cinemaId);
 }

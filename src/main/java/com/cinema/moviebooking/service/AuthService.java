@@ -35,7 +35,7 @@ public class AuthService {
      */
     @Transactional
     public SignUpResponse signUp(SignUpRequest req) {
-        if (memberRepository.existsByEmail(req.getEmail())) {
+        if (memberRepository.existsByEmailAndDeletedAtIsNull(req.getEmail())) {
             throw new DuplicateResourceException("이미 사용 중인 이메일입니다.");
         }
 

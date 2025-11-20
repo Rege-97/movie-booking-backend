@@ -31,7 +31,8 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                 .where(
                         screening.theater.eq(theater),
                         screening.startTime.before(endTime),
-                        screening.endTime.after(startTime)
+                        screening.endTime.after(startTime),
+                        screening.deletedAt.isNull()
                 )
                 .fetchFirst() != null;
     }
@@ -50,7 +51,10 @@ public class ScreeningRepositoryImpl implements ScreeningRepositoryCustom {
                         theater.cinema.id.eq(cinemaId),
                         screening.startTime.between(startOfDay, endOfDay),
                         screening.status.eq(ScreeningStatus.SCHEDULED),
-                        screening.startTime.goe(LocalDateTime.now())
+                        screening.startTime.goe(LocalDateTime.now()),
+                        screening.deletedAt.isNull(),
+                        theater.deletedAt.isNull(),
+                        movie.deletedAt.isNull()
                 )
                 .fetch();
     }

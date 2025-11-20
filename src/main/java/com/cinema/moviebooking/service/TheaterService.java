@@ -45,7 +45,7 @@ public class TheaterService {
         Cinema cinema = cinemaRepository.findById(req.getCinemaId())
                 .orElseThrow(() -> new NotFoundException("해당 영화관을 찾을 수 없습니다."));
 
-        if (theaterRepository.existsByCinemaAndName(cinema, req.getName())) {
+        if (theaterRepository.existsByCinemaAndNameAndDeletedAtIsNull(cinema, req.getName())) {
             throw new DuplicateResourceException("이미 존재하는 상영관 이름입니다.");
         }
 

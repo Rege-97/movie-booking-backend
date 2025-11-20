@@ -50,7 +50,10 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
                 .join(screening.movie, movie)
                 .where(
                         member.id.eq(memberId),
-                        idLt(lastId)
+                        idLt(lastId),
+                        cinema.deletedAt.isNull(),
+                        theater.deletedAt.isNull(),
+                        movie.deletedAt.isNull()
                 )
                 .orderBy(reservation.id.desc())
                 .limit(size + 1)
