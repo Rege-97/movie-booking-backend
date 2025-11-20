@@ -5,6 +5,7 @@ import com.cinema.moviebooking.dto.auth.LoginRequest;
 import com.cinema.moviebooking.dto.auth.LoginResponse;
 import com.cinema.moviebooking.dto.auth.SignUpRequest;
 import com.cinema.moviebooking.dto.auth.SignUpResponse;
+import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.security.CustomUserDetails;
 import com.cinema.moviebooking.service.AuthService;
 import jakarta.validation.Valid;
@@ -12,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 인증 관련 요청을 처리하는 컨트롤러
@@ -58,8 +56,9 @@ public class AuthController {
      * - 로그아웃 성공 시 204(No Content) 반환
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails member) {
-        authService.logout(member.getId());
+    public ResponseEntity<?> logout(@AuthenticationPrincipal Member member,
+                                    @RequestHeader("Authorization") String authorizationHeader) {
+        authService.logout(member.getId(), authorizationHeader.substring(7));
         return ResponseEntity.noContent().build();
     }
 }

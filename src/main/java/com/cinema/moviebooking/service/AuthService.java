@@ -33,6 +33,7 @@ public class AuthService {
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
+    private static final String BLACKLIST_PREFIX = "blacklist:";
 
     private String getRefreshTokenKey(Long memberId) {
         return REFRESH_TOKEN_PREFIX + memberId;
@@ -92,11 +93,16 @@ public class AuthService {
      * - 사용자 검증 후 Refresh 토큰 제거
      */
     @Transactional
-    public void logout(Long memberId) {
+    public void logout(Long memberId, String accessToken) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("회원"));
 
         String key = getRefreshTokenKey(memberId);
         redisTemplate.delete(key);
+
+        Duration expiration = Duration.ofMillis(jwtTokenProvider.getAccessExpirationMs());
+        String blacklistKey = BLACKLIST_PREFIX + accessToken;
+
+        redisTemplate.opsForValue().set(blacklistKey, "logout", expiration);
     }
 }
