@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Gradle Wrapper, 설정 파일, 빌드 스크립트 복사
 COPY gradlew .
+RUN chmod +x gradlew
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
