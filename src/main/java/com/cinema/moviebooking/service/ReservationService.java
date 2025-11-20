@@ -97,6 +97,7 @@ public class ReservationService {
                 ReservedSeat reservedSeat = ReservedSeat.builder()
                         .reservation(reservation)
                         .seat(seat)
+                        .screening(screening)
                         .build();
 
                 reservation.addReservedSeat(reservedSeat);

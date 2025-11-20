@@ -2,7 +2,7 @@ spring:
   application:
     name: MovieBooking
   datasource:
-    url: jdbc:mysql://localhost:3306/movie_db3
+    url: jdbc:mysql://localhost:3306/movie_db
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
