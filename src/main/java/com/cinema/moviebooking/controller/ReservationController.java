@@ -7,6 +7,8 @@ import com.cinema.moviebooking.dto.reservation.ReservationCreateResponse;
 import com.cinema.moviebooking.entity.Member;
 import com.cinema.moviebooking.service.RedissonLockReservationFacade;
 import com.cinema.moviebooking.service.ReservationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * 영화 예매 요청을 처리하는 컨트롤러
  * (영화 예매, 취소 등)
  */
+@Tag(name = "Reservation", description = "영화 예매 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/reservations")
@@ -32,6 +35,7 @@ public class ReservationController {
      * - 로그인 필요
      * - 등록 성공 시 201(CREATED) 반환
      */
+    @Operation(summary = "영화 예매", description = "좌석을 선택하여 예매를 진행합니다.")
     @PostMapping
     public ResponseEntity<?> createReservation(@Valid @RequestBody ReservationCreateRequest req,
                                                @AuthenticationPrincipal Member member) {
@@ -46,6 +50,7 @@ public class ReservationController {
      * - 로그인 필요
      * - 조회 성공 시 200(OK) 상태 코드 반환
      */
+    @Operation(summary = "내 예매 목록 조회", description = "로그인한 사용자의 예매 내역을 조회합니다.")
     @GetMapping("/my")
     public ResponseEntity<?> getReservations(@AuthenticationPrincipal Member member,
                                              @RequestParam(required = false) Long lastId,
@@ -61,6 +66,7 @@ public class ReservationController {
      * - 로그인 필요
      * - 취소 성공 시 204(NO_CONTENT) 반환
      */
+    @Operation(summary = "예매 취소", description = "예매한 내역을 취소합니다. (상영 15분 전까지만 가능)")
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelReservation(@PathVariable Long id, @AuthenticationPrincipal Member member) {
         reservationService.cancelReservation(member, id);
