@@ -3,6 +3,8 @@ package com.cinema.moviebooking.controller;
 import com.cinema.moviebooking.common.response.ApiResponse;
 import com.cinema.moviebooking.dto.cinema.*;
 import com.cinema.moviebooking.service.CinemaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import java.time.LocalDate;
  * 영화관 관련 요청을 처리하는 컨트롤러
  * (영화관 등록, 조회, 수정, 삭제 등)
  */
+@Tag(name = "Cinema", description = "영화관 관리 API")
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class CinemaController {
      * - 관리자 권한(ROLE_ADMIN) 필요
      * - 등록 성공 시 201(CREATED) 반환
      */
+    @Operation(summary = "영화관 등록", description = "관리자 권한으로 새로운 영화관을 등록합니다.")
     @PostMapping
     public ResponseEntity<?> createCinema(@Valid @RequestBody CinemaCreateRequest req) {
         CinemaCreateResponse res = cinemaService.createCinema(req);
@@ -44,6 +48,7 @@ public class CinemaController {
      * - 커서 기반 페이지네이션 지원 (lastId, size)
      * - 조회 성공 시 200(OK) 상태 코드 반환
      */
+    @Operation(summary = "영화관 목록 조회", description = "검색어(keyword) 및 지역(region)으로 영화관을 조회합니다. (커서 기반 페이지네이션)")
     @GetMapping
     public ResponseEntity<?> getCinemas(
             @RequestParam(required = false) String keyword,
@@ -60,6 +65,7 @@ public class CinemaController {
      * - PathVariable로 ID 전달
      * - 조회 성공 시 200(OK) 상태 코드 반환
      */
+    @Operation(summary = "영화관 상세 조회", description = "ID로 특정 영화관의 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
     public ResponseEntity<?> getCinema(@PathVariable Long id) {
         CinemaResponse res = cinemaService.getCinemaById(id);
@@ -74,6 +80,7 @@ public class CinemaController {
      * - 관리자 권한(ROLE_ADMIN) 필요
      * - 수정 성공 시 200(OK) 반환
      */
+    @Operation(summary = "영화관 정보 수정", description = "관리자 권한으로 영화관 정보를 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCinema(@PathVariable Long id, @Valid @RequestBody CinemaUpdateRequest req) {
         CinemaResponse res = cinemaService.updateCinema(id, req);
@@ -87,6 +94,7 @@ public class CinemaController {
      * - 관리자 권한(ROLE_ADMIN) 필요
      * - 삭제 성공 시 204(NO_CONTENT) 반환
      */
+    @Operation(summary = "영화관 삭제", description = "관리자 권한으로 영화관을 삭제합니다.")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCinema(@PathVariable Long id) {
         cinemaService.deleteCinema(id);
@@ -98,6 +106,7 @@ public class CinemaController {
      * - PathVariable로 ID 전달
      * - 조회 성공 시 200(OK) 반환
      */
+    @Operation(summary = "영화관별 상영관 목록 조회", description = "특정 영화관에 소속된 상영관 목록을 조회합니다.")
     @GetMapping("/{id}/theaters")
     public ResponseEntity<?> getTheaters(@PathVariable Long id) {
         TheaterListResponse res = cinemaService.getTheatersByCinemaId(id);
@@ -111,6 +120,7 @@ public class CinemaController {
      * - 상영일(screeningDate) 필터 적용
      * - 조회 성공 시 200(OK) 반환
      */
+    @Operation(summary = "영화관별 상영 스케줄 조회", description = "특정 영화관의 날짜별 상영 스케줄을 조회합니다.")
     @GetMapping("/{id}/screenings")
     public ResponseEntity<?> getScreenings(@PathVariable Long id,
                                            @FutureOrPresent(message = "상영일은 오늘 날짜 이후여야 합니다.")
