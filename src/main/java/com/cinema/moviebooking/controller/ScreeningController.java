@@ -1,0 +1,68 @@
+package com.cinema.moviebooking.controller;
+
+import com.cinema.moviebooking.common.response.ApiResponse;
+import com.cinema.moviebooking.dto.Screening.AvailableSeatResponse;
+import com.cinema.moviebooking.dto.Screening.ScreeningCreateRequest;
+import com.cinema.moviebooking.dto.Screening.ScreeningCreateResponse;
+import com.cinema.moviebooking.service.ScreeningService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 상영스케줄 관련 요청을 처리하는 컨트롤러
+ * (상영스케줄 등록, 수정, 삭제 등)
+ */
+@Tag(name = "Screening", description = "상영 스케줄 관리 API")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/screenings")
+public class ScreeningController {
+
+    private final ScreeningService screeningService;
+
+    /**
+     * 상영스케줄 등록 처리
+     * - 요청값 검증(@Valid)
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 등록 성공 시 201(CREATED) 반환
+     */
+    @Operation(summary = "상영 스케줄 등록", description = "관리자 권한으로 특정 영화와 상영관의 스케줄을 등록합니다.")
+    @PostMapping
+    public ResponseEntity<?> createScreening(@Valid @RequestBody ScreeningCreateRequest req) {
+        ScreeningCreateResponse res = screeningService.createScreening(req);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.created(res, "상영 스케줄 등록이 완료되었습니다."));
+    }
+
+    /**
+     * 상영 취소 요청 처리
+     * - PathVariable로 ID 전달
+     * - 관리자 권한(ROLE_ADMIN) 필요
+     * - 취소 성공 시 204(NO_CONTENT) 반환
+     */
+    @Operation(summary = "상영 취소", description = "관리자 권한으로 상영 스케줄을 취소합니다.")
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelScreening(@PathVariable Long id) {
+        screeningService.cancelScreening(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * 예매 가능 좌석 조회 요청 처리
+     * - 조회 성공 시 200(OK) 상태 코드 반환
+     */
+    @Operation(summary = "예매 가능 좌석 조회", description = "특정 상영 스케줄의 예매 가능한 좌석 목록을 조회합니다.")
+    @GetMapping("/{id}/available-seats")
+    public ResponseEntity<?> getAvailableSeat(@PathVariable Long id) {
+        List<AvailableSeatResponse> res = screeningService.getAvailableSeat(id);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(res, "예매 가능 좌석 조회 성공"));
+    }
+}

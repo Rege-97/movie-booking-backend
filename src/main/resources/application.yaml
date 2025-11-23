@@ -1,18 +1,33 @@
 spring:
+  config:
+    activate:
+      on-profile: default
+  profiles:
+    include: secret
+
   application:
     name: MovieBooking
   datasource:
-    url: jdbc:mysql://localhost:3306/movie_db
-    username: root
-    password: 1234
+    url: jdbc:mysql://host.docker.internal:3306/movie_db
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 60
+      minimum-idle: 10
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
-  data:
-    redis:
-      host: localhost
-      port: 6379
+        format_sql: false
+        session_factory.statement_inspector: com.cinema.moviebooking.config.QueryCountInspector
+    defer-datasource-initialization: true
+  cache:
+    type: redis
+
+jwt:
+  access-expiration-ms: 3600000
+  refresh-expiration-ms: 604800000
