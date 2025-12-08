@@ -54,6 +54,7 @@ jobs:
             SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}
             SPRING_DATA_REDIS_HOST=${{ secrets.REDIS_HOST }}
             SPRING_DATA_REDIS_PORT=6379 
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
 
       # 5. ECS 서비스 배포
       - name: Deploy Amazon ECS task definition
